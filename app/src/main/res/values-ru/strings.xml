@@ -8,5 +8,4 @@
     <string name="description_commentsIcon">Кнопка комментария</string>
     <string name="description_shareIcon">Кнопка \"поделиться\"</string>
     <string name="description_watchIcon">Иконка \"количество просмотров\"</string>
-    <string name="description_watchIcon">И</string>
 </resources>
