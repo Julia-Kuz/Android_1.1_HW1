@@ -2,4 +2,10 @@
 <resources>
     <string name="app_name">Первое приложение</string>
     <string name="nmedia">НМедиа!</string>
+    <string name="description_post_author_avatar">Аватар автора поста</string>
+    <string name="description_post_menu">Меню поста</string>
+    <string name="description_likeIcon">Кнопка \"Нравится\"</string>
+    <string name="description_commentsIcon">Кнопка комментария</string>
+    <string name="description_shareIcon">Кнопка \"поделиться\"</string>
+    <string name="description_watchIcon">Иконка \"количество просмотров\"</string>
 </resources>
