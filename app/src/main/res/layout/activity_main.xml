@@ -13,6 +13,7 @@
         android:layout_height="@dimen/posts_avatar_size"
         android:layout_marginBottom="@dimen/common_spacing"
         android:contentDescription="@string/description_post_author_avatar"
+        android:src="@drawable/ic_netology_48dp"
         app:layout_constraintBottom_toBottomOf="@id/barrier"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -75,7 +76,7 @@
         app:layout_constraintTop_toBottomOf="@id/barrier"
         tools:text="@sample/posts.json/data/content" />
 
-    <!--   ДЗ    -->
+    <!--   Reactions    -->
 
     <ImageButton
         android:id="@+id/likesIcon"
@@ -87,7 +88,7 @@
         app:layout_constraintEnd_toStartOf="@id/likesNumberText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/barrierBottom"
-        app:srcCompat="@drawable/ic_recommend_24" />
+        app:srcCompat="@drawable/ic_like_24" />
 
     <TextView
         android:id="@+id/likesNumberText"
@@ -144,24 +145,24 @@
         tools:text="@sample/reaction.json/data/shareNumber" />
 
     <ImageButton
-        android:id="@+id/watchIcon"
+        android:id="@+id/viewIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_watchIcon"
         app:layout_constraintBottom_toBottomOf="@id/likesIcon"
-        app:layout_constraintEnd_toStartOf="@id/watchNumberText"
+        app:layout_constraintEnd_toStartOf="@id/viewNumberText"
         app:layout_constraintTop_toTopOf="@id/barrierBottom"
         app:srcCompat="@drawable/ic_eye_24" />
 
     <TextView
-        android:id="@+id/watchNumberText"
+        android:id="@+id/viewNumberText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="3dp"
-        app:layout_constraintBottom_toBottomOf="@id/watchIcon"
+        app:layout_constraintBottom_toBottomOf="@id/viewIcon"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/watchIcon"
+        app:layout_constraintTop_toTopOf="@+id/viewIcon"
         tools:text="@sample/reaction.json/data/watchNumber" />
 
 
@@ -170,7 +171,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="top"
-        app:constraint_referenced_ids="likesIcon, commentsIcon, shareIcon, watchIcon" />
+        app:constraint_referenced_ids="likesIcon, commentsIcon, shareIcon, viewIcon" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
