@@ -7,5 +7,12 @@
     <string name="description_commentsIcon">Comment button</string>
     <string name="description_shareIcon">Share button</string>
     <string name="description_watchIcon">Watch Icon</string>
+    <string name="menu_remove">Remove</string>
+    <string name="post_text">Post Text</string>
+    <string name="menu_edit">Edit</string>
+    <string name="error_empty_content">Content can\'t be empty</string>
+    <string name="save_the_changes">Save the changes</string>
+    <string name="cancel_the_changes">Cancel the changes</string>
+    <string name="cancel">Cancel the changes</string>
 
 </resources>

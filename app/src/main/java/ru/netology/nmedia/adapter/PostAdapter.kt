@@ -1,7 +1,9 @@
 package ru.netology.nmedia.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -10,48 +12,31 @@ import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.numberRepresentation
 
-typealias OnLikeListener = (post: Post) -> Unit                   // что означает? как работает?
+interface OnInteractionListener {
+    fun like(post: Post)
+    fun share(post: Post)
+    fun view(post: Post)
+    fun remove(post: Post)
+    fun edit(post: Post)
+}
 
-// вариант просто recyclerView (до "override fun onCreateViewHolder"):
-/*class PostsAdapter(
-    private val onLikeListener: OnLikeListener,
-    private val onShareListener: OnLikeListener,
-    private val onViewListener: OnLikeListener
-    ) : RecyclerView.Adapter<PostViewHolder>() {
-    var list = emptyList<Post>()
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
-*/
-
-// вариант DiffUtil
-class PostsAdapter(
-    private val onLikeListener: OnLikeListener,
-    private val onShareListener: OnLikeListener,
-    private val onViewListener: OnLikeListener
-) : ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
+class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
+    ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(binding, onLikeListener, onShareListener, onViewListener)
+        return PostViewHolder(binding, onInteractionListener)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        //val post = list[position]                                         // - просто recyclerView
-        val post = getItem(position)                                        // - DiffUtil
+        val post = getItem(position)
         holder.bind(post)
     }
 }
 
-//    override fun getItemCount(): Int = list.size                          // - просто recyclerView
-//}
-
 class PostViewHolder(
     private val binding: CardPostBinding,
-    private val onLikeListener: OnLikeListener,
-    private val onShareListener: OnLikeListener,
-    private val onViewListener: OnLikeListener
+    private val onInteractionListener: OnInteractionListener
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {
         binding.apply {
@@ -61,28 +46,42 @@ class PostViewHolder(
             likesIcon.setImageResource(
                 if (post.likedByMe) R.drawable.ic_like_red_24 else R.drawable.ic_like_24
             )
-//            if (post.likedByMe) {
-//                likesIcon.setImageResource(R.drawable.ic_like_red_24)        - распространенная ошибка (!)
-//            }
             likesNumberText.text = numberRepresentation(post.likes)
             shareNumberText.text = numberRepresentation(post.share)
             viewNumberText.text = numberRepresentation(post.views)
 
             likesIcon.setOnClickListener {
-                onLikeListener(post)                                      // еще разобраться!
+                onInteractionListener.like(post)
             }
             shareIcon.setOnClickListener {
-                onShareListener(post)
+                onInteractionListener.share(post)
             }
             viewIcon.setOnClickListener {
-                onViewListener(post)
+                onInteractionListener.view(post)
+            }
+            menu.setOnClickListener {
+                PopupMenu(it.context, it).apply {
+                    inflate(R.menu.menu_optons)
+                    setOnMenuItemClickListener { menuItem ->
+                        when (menuItem.itemId) {
+                            R.id.remove -> {
+                                onInteractionListener.remove(post)
+                                true
+                            }
+
+                            R.id.edit -> {
+                                onInteractionListener.edit(post)
+                                true
+                            }
+
+                            else -> false
+                        }
+                    }
+                }.show()           // ПОМНИТЬ прo show()!!!
             }
         }
     }
 }
-
-
-// создаем класс для DiffUtil (передаем в ListAdapter)
 
 class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
     override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
@@ -92,5 +91,4 @@ class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
     override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
         return oldItem == newItem
     }
-
 }
