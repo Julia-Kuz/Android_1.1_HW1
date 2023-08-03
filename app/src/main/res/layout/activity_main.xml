@@ -1,177 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/common_spacing"
-    tools:context=".MainActivity">
+    tools:context=".activity.MainActivity">
 
-    <ImageView
-        android:id="@+id/avatar"
-        android:layout_width="@dimen/posts_avatar_size"
-        android:layout_height="@dimen/posts_avatar_size"
-        android:layout_marginBottom="@dimen/common_spacing"
-        android:contentDescription="@string/description_post_author_avatar"
-        android:src="@drawable/ic_netology_48dp"
-        app:layout_constraintBottom_toBottomOf="@id/barrier"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@sample/posts.json/data/authorAvatar" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/card_post"
+        tools:itemCount="5">
 
-    <TextView
-        android:id="@+id/author"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/common_spacing"
-        android:layout_marginEnd="@dimen/common_spacing"
-        android:ellipsize="end"
-        android:singleLine="true"
-        app:layout_constraintBottom_toTopOf="@+id/published"
-        app:layout_constraintEnd_toStartOf="@id/menu"
-        app:layout_constraintStart_toEndOf="@id/avatar"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
-        tools:text="@sample/posts.json/data/author" />
-
-    <TextView
-        android:id="@+id/published"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/common_spacing"
-        android:layout_marginEnd="@dimen/common_spacing"
-        android:layout_marginBottom="@dimen/common_spacing"
-        app:layout_constraintBottom_toBottomOf="@id/barrier"
-        app:layout_constraintEnd_toStartOf="@id/menu"
-        app:layout_constraintStart_toEndOf="@id/avatar"
-        app:layout_constraintTop_toBottomOf="@id/author"
-        tools:text="@sample/posts.json/data/published" />
-
-    <ImageButton
-        android:id="@+id/menu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/common_spacing"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/description_post_menu"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_more_vert_24" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="avatar,published,menu" />
-
-    <TextView
-        android:id="@+id/content"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/common_spacing"
-        android:autoLink="web"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/barrier"
-        tools:text="@sample/posts.json/data/content" />
-
-    <!--   Reactions    -->
-
-    <ImageButton
-        android:id="@+id/likesIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/description_likeIcon"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/likesNumberText"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/barrierBottom"
-        app:srcCompat="@drawable/ic_like_24" />
-
-    <TextView
-        android:id="@+id/likesNumberText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="3dp"
-        app:layout_constraintBottom_toBottomOf="@id/likesIcon"
-        app:layout_constraintStart_toEndOf="@id/likesIcon"
-        app:layout_constraintTop_toTopOf="@id/likesIcon"
-        tools:text="@sample/reaction.json/data/likesNumber" />
-
-    <ImageButton
-        android:id="@+id/commentsIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/common_spacing"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/description_commentsIcon"
-        app:layout_constraintBottom_toBottomOf="@id/likesIcon"
-        app:layout_constraintStart_toEndOf="@id/likesNumberText"
-        app:layout_constraintTop_toTopOf="@id/barrierBottom"
-        app:srcCompat="@drawable/ic_comment_24" />
-
-    <TextView
-        android:id="@+id/commentsNumberText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="3dp"
-        app:layout_constraintBottom_toBottomOf="@id/commentsIcon"
-        app:layout_constraintStart_toEndOf="@id/commentsIcon"
-        app:layout_constraintTop_toTopOf="@id/commentsIcon"
-        tools:text="@sample/reaction.json/data/commentsNumber" />
-
-    <ImageButton
-        android:id="@+id/shareIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/common_spacing"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/description_shareIcon"
-        app:layout_constraintBottom_toBottomOf="@id/likesIcon"
-        app:layout_constraintStart_toEndOf="@id/commentsNumberText"
-        app:layout_constraintTop_toTopOf="@id/barrierBottom"
-        app:srcCompat="@drawable/ic_share_24" />
-
-    <TextView
-        android:id="@+id/shareNumberText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="3dp"
-        app:layout_constraintBottom_toBottomOf="@id/shareIcon"
-        app:layout_constraintStart_toEndOf="@id/shareIcon"
-        app:layout_constraintTop_toTopOf="@id/shareIcon"
-        tools:text="@sample/reaction.json/data/shareNumber" />
-
-    <ImageButton
-        android:id="@+id/viewIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/description_watchIcon"
-        app:layout_constraintBottom_toBottomOf="@id/likesIcon"
-        app:layout_constraintEnd_toStartOf="@id/viewNumberText"
-        app:layout_constraintTop_toTopOf="@id/barrierBottom"
-        app:srcCompat="@drawable/ic_eye_24" />
-
-    <TextView
-        android:id="@+id/viewNumberText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="3dp"
-        app:layout_constraintBottom_toBottomOf="@id/viewIcon"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/viewIcon"
-        tools:text="@sample/reaction.json/data/watchNumber" />
-
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrierBottom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="top"
-        app:constraint_referenced_ids="likesIcon, commentsIcon, shareIcon, viewIcon" />
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.recyclerview.widget.RecyclerView>
+</FrameLayout>
