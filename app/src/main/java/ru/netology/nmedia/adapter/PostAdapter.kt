@@ -43,11 +43,9 @@ class PostViewHolder(
             author.text = post.author
             published.text = post.published
             content.text = post.content
-            likesIcon.setImageResource(
-                if (post.likedByMe) R.drawable.ic_like_red_24 else R.drawable.ic_like_24
-            )
-            likesNumberText.text = numberRepresentation(post.likes)
-            shareNumberText.text = numberRepresentation(post.share)
+            likesIcon.isChecked = post.likedByMe
+            likesIcon.text = numberRepresentation(post.likes)
+            shareIcon.text = numberRepresentation(post.share)
             viewNumberText.text = numberRepresentation(post.views)
 
             likesIcon.setOnClickListener {
