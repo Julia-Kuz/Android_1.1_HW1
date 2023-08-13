@@ -4,5 +4,13 @@
     <color name="white">#FFFFFFFF</color>
     <color name="red">#FF0000</color>
     <color name="grey">#F3F2F2</color>
+    <color name="grey_blue">#ACCDFB</color>
+    <color name="green">#19783B</color>
+    <color name="blue">#0066FF</color>
+    <color name="violet">#5D00F5</color>
+    <color name="crimson">#EB236B</color>
+    <color name="light_green">#4BD0A0</color>
+    <color name="dark_green">#02320B</color>
+    <color name="very_light_green">#C4FAD4</color>
 
 </resources>

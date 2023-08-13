@@ -9,85 +9,25 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerList"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toTopOf="@id/barrierTop"
         app:layout_constraintTop_toTopOf="parent"
         tools:itemCount="5"
         tools:listitem="@layout/card_post">
 
     </androidx.recyclerview.widget.RecyclerView>
 
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrierTop"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addPost"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:barrierDirection="top"
-        app:constraint_referenced_ids="editContent, editSave" />
-
-    <EditText
-        android:id="@+id/editContent"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:hint="@string/post_text"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine"
-        android:paddingHorizontal="@dimen/common_spacing"
-        android:paddingVertical="@dimen/common_spacing"
-        android:textStyle="italic"
+        android:layout_margin="24dp"
+        android:backgroundTint="@color/light_green"
+        android:contentDescription="@string/add_post"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/editSave"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/barrierTop" />
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/groupEdit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:constraint_referenced_ids="editCancel, cancelConfirmation" />
-
-    <ImageButton
-        android:id="@+id/editSave"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/save_the_changes"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="@dimen/common_spacing"
-        android:src="@drawable/ic_save_check_24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <ImageButton
-        android:id="@+id/editCancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:background="@android:color/white"
-        android:contentDescription="@string/cancel_the_changes"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="@dimen/common_spacing"
-        android:src="@drawable/ic_clear_24"
-        app:layout_constraintBottom_toTopOf="@id/barrierTop"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/editSave" />
+        app:srcCompat="@drawable/ic_add_24dp">
 
-    <TextView
-        android:id="@+id/cancelConfirmation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:paddingHorizontal="25dp"
-        android:paddingVertical="@dimen/common_spacing"
-        android:text="@string/cancel"
-        android:textColor="@color/red"
-        android:textSize="18dp"
-        android:textStyle="italic"
-        app:layout_constraintBottom_toBottomOf="@id/editCancel"
-        app:layout_constraintEnd_toStartOf="@id/editCancel"
-        app:layout_constraintTop_toTopOf="@id/editCancel" />
-
+    </com.google.android.material.floatingactionbutton.FloatingActionButton>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

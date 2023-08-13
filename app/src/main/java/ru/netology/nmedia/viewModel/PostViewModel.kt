@@ -53,12 +53,16 @@ class PostViewModel : ViewModel() {
     }
 
     fun edit(post: Post) {
-        edited.value = post
-    }
-
-    fun cancel() {
+        edited.value = post.copy()
+        edited.value?.let {
+            repository.save(it.copy())
+        }
         edited.value = defaultPost
     }
+
+//    fun cancel() {
+//        edited.value = defaultPost
+//    }
 
 
 }
