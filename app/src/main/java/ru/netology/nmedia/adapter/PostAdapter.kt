@@ -51,7 +51,7 @@ class PostViewHolder(
 
             if (post.videoLink != null) {
                 groupPlay.visibility = View.VISIBLE
-            }
+            } else groupPlay.visibility = View.GONE
 
             likesIcon.setOnClickListener {
                 onInteractionListener.like(post)

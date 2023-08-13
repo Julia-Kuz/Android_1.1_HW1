@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="@dimen/common_spacing">
-    <!--tools:context=".MainActivity"> -->
 
     <ImageView
         android:id="@+id/avatar"
@@ -72,7 +71,8 @@
         android:autoLink="web"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/videoLink"
+        app:layout_constraintTop_toBottomOf="@id/barrier"
+        app:layout_constraintBottom_toTopOf="@id/videoLink"
         tools:text="@sample/posts.json/data/content" />
 
     <androidx.constraintlayout.widget.Group
@@ -88,10 +88,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/common_spacing"
         android:src="@drawable/ic_youtube_seeklogo_com"
-        app:layout_constraintBottom_toTopOf="@id/content"
+        app:layout_constraintBottom_toTopOf="@id/barrierBottom"
         app:layout_constraintEnd_toEndOf="@id/content"
         app:layout_constraintStart_toStartOf="@id/content"
-        app:layout_constraintTop_toBottomOf="@id/barrier" />
+        app:layout_constraintTop_toBottomOf="@id/content" />
 
     <ImageButton
         android:id="@+id/play"
