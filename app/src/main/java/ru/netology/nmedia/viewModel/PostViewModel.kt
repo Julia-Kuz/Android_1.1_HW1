@@ -1,10 +1,14 @@
 package ru.netology.nmedia.viewModel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.repository.PostRepository
+import ru.netology.nmedia.repository.PostRepositoryFileImpl
 import ru.netology.nmedia.repository.PostRepositoryInMemoryImpl
+import ru.netology.nmedia.repository.PostRepositorySharedPreferencesImpl
 
 private val defaultPost = Post(
     id = 0,
@@ -14,8 +18,13 @@ private val defaultPost = Post(
     published = ""
 )
 
-class PostViewModel : ViewModel() {
-    private val repository: PostRepository = PostRepositoryInMemoryImpl()
+//class PostViewModel : ViewModel() {
+//    private val repository: PostRepository = PostRepositoryInMemoryImpl()
+
+class PostViewModel (application: Application) : AndroidViewModel (application) {
+    //private val repository: PostRepository = PostRepositorySharedPreferencesImpl(application) // здесь нужен context (переменная application), чтобы его получить, нужно пробросить через конструктор (строка 24)
+    private val repository: PostRepository = PostRepositoryFileImpl(application)
+
     val data = repository.getAll() // св-во data переадресовываем в репозиторий
 
     val edited = MutableLiveData(defaultPost)
