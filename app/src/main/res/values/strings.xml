@@ -11,8 +11,13 @@
     <string name="post_text">Post Text</string>
     <string name="menu_edit">Edit</string>
     <string name="error_empty_content">Content can\'t be empty</string>
-    <string name="save_the_changes">Save the changes</string>
-    <string name="cancel_the_changes">Cancel the changes</string>
+    <string name="description_save_the_changes">Save the changes</string>
+    <string name="description_cancel_the_changes">Cancel the changes</string>
     <string name="cancel">Cancel the changes</string>
+    <string name="add_post">Add post</string>
+    <string name="chooser_share_post">Share post</string>
+    <string name="chooser_view_link">Open link</string>
+    <string name="save">save</string>
+
 
 </resources>

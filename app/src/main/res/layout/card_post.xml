@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="@dimen/common_spacing">
-    <!--tools:context=".MainActivity"> -->
 
     <ImageView
         android:id="@+id/avatar"
@@ -73,7 +72,36 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/barrier"
+        app:layout_constraintBottom_toTopOf="@id/videoLink"
         tools:text="@sample/posts.json/data/content" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/groupPlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="videoLink, play" />
+
+    <ImageButton
+        android:id="@+id/videoLink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/common_spacing"
+        android:src="@drawable/ic_youtube_seeklogo_com"
+        app:layout_constraintBottom_toTopOf="@id/barrierBottom"
+        app:layout_constraintEnd_toEndOf="@id/content"
+        app:layout_constraintStart_toStartOf="@id/content"
+        app:layout_constraintTop_toBottomOf="@id/content" />
+
+    <ImageButton
+        android:id="@+id/play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_play_arrow_24"
+        app:layout_constraintBottom_toBottomOf="@id/videoLink"
+        app:layout_constraintEnd_toEndOf="@id/videoLink"
+        app:layout_constraintStart_toStartOf="@id/videoLink"
+        app:layout_constraintTop_toTopOf="@id/videoLink" />
 
     <!--   Reactions    -->
 
@@ -89,36 +117,25 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/shareIcon"
-        style="@style/Widget.AppTheme.ShareButton"
+        style="@style/Widget.AppTheme.ShareAndViewButton"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:contentDescription="@string/description_shareIcon"
+        app:icon="@drawable/ic_share_24"
         app:layout_constraintBottom_toBottomOf="@id/likesIcon"
         app:layout_constraintStart_toEndOf="@id/likesIcon"
         app:layout_constraintTop_toTopOf="@id/likesIcon" />
 
-    <ImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/viewIcon"
+        style="@style/Widget.AppTheme.ShareAndViewButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:background="@android:color/transparent"
+        android:layout_height="0dp"
         android:contentDescription="@string/description_watchIcon"
+        app:icon="@drawable/ic_eye_24"
         app:layout_constraintBottom_toBottomOf="@id/likesIcon"
-        app:layout_constraintEnd_toStartOf="@id/viewNumberText"
-        app:layout_constraintTop_toTopOf="@id/barrierBottom"
-        app:srcCompat="@drawable/ic_eye_24" />
-
-    <TextView
-        android:id="@+id/viewNumberText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="3dp"
-        app:layout_constraintBottom_toBottomOf="@id/viewIcon"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/viewIcon"
-        tools:text="@sample/reaction.json/data/watchNumber" />
-
+        app:layout_constraintTop_toTopOf="@id/likesIcon" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrierBottom"

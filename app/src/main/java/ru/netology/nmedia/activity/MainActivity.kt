@@ -1,11 +1,14 @@
 package ru.netology.nmedia.activity
 
+import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.activity.result.launch
 import androidx.activity.viewModels
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
@@ -23,13 +26,32 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val viewModel: PostViewModel by viewModels()
+
+        val editPostLauncher =
+            registerForActivityResult(EditPostResultContract()) { result ->
+                result ?: return@registerForActivityResult
+                viewModel.edit(result)
+            }
+
         val adapter = PostsAdapter(object : OnInteractionListener {
             override fun like(post: Post) {
                 viewModel.likeById(post.id)
             }
 
             override fun share(post: Post) {
-                viewModel.shareById(post.id)
+                val intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, post.content)
+                    type = "text/plain"
+                }
+                val shareIntent =
+                    Intent.createChooser(
+                        intent,
+                        getString(R.string.chooser_share_post)
+                    ) //создается chooser - выбор между приложениями
+                startActivity(shareIntent)
+
+                //viewModel.shareById(post.id)
             }
 
             override fun view(post: Post) {
@@ -41,45 +63,25 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun edit(post: Post) {
-                binding.groupEdit.visibility = View.VISIBLE
-                viewModel.edit(post)
+                editPostLauncher.launch(post)
+            }
+
+            override fun play(post: Post) {
+//                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoLink)) // в ДЗ
+
+                val intent =
+                    Intent(Intent.ACTION_VIEW).apply {             //на сайте https://developer.android.com/guide/components/intents-common#Music
+                        data = Uri.parse(post.videoLink)
+                    }
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                }
             }
         }
         )
 
         binding.recyclerList.adapter = adapter  // получаю доступ к RecyclerView
 
-        binding.editSave.setOnClickListener {
-
-            val text = binding.editContent.text.toString()
-            if (text.isEmpty()) {
-                Toast.makeText(                     // - показ всплывающего сообщения
-                    this,                     // context (1ый параметр)
-                    R.string.error_empty_content,   // текст всплывающего сообщения
-                    Toast.LENGTH_LONG               // длительность показа сообщения
-                ).show()
-                return@setOnClickListener
-            }
-            viewModel.changeContentAndSave(text)
-
-            //viewModel.save()
-
-            binding.editContent.setText("")  // очищает поле ввода после сохранения
-            binding.editContent.clearFocus() // сбрасываем фокус, убирается курсор
-            hideKeyboard(it)                 // from AndroidUtils
-            binding.groupEdit.visibility = View.GONE
-
-        }
-
-        binding.editCancel.setOnClickListener {
-
-            viewModel.cancel()
-
-            binding.editContent.setText("")
-            binding.editContent.clearFocus()
-            hideKeyboard(it)
-            binding.groupEdit.visibility = View.GONE
-        }
 
         viewModel.data.observe(this) { posts ->
             val newPost =
@@ -91,15 +93,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.edited.observe(this) {
-            if (it.id == 0L) {
-                return@observe
-            }
-            with(binding.editContent) {
-                //requestFocus()
-                focusAndShowKeyboard()         // from AndroidUtils
-                setText(it.content)
-            }
+        val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
+            result ?: return@registerForActivityResult
+            viewModel.changeContentAndSave(result)
         }
+
+        binding.addPost.setOnClickListener {
+            newPostLauncher.launch()
+        }
+
     }
 }
