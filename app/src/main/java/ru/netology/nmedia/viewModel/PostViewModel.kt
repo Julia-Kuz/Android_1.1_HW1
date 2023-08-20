@@ -21,7 +21,7 @@ private val defaultPost = Post(
 //class PostViewModel : ViewModel() {
 //    private val repository: PostRepository = PostRepositoryInMemoryImpl()
 
-class PostViewModel (application: Application) : AndroidViewModel (application) {
+class PostViewModel(application: Application) : AndroidViewModel(application) {
     //private val repository: PostRepository = PostRepositorySharedPreferencesImpl(application) // здесь нужен context (переменная application), чтобы его получить, нужно пробросить через конструктор (строка 24)
     private val repository: PostRepository = PostRepositoryFileImpl(application)
 

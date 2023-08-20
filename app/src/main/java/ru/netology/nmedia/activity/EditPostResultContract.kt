@@ -10,7 +10,7 @@ class EditPostResultContract : ActivityResultContract<Post, Post?>() {
     private lateinit var inputPost: Post
     override fun createIntent(context: Context, input: Post): Intent {
         inputPost = input.copy()
-        return Intent(context, EditPostActivity::class.java).putExtra(
+        return Intent(context, EditPostFragment::class.java).putExtra(
             Intent.EXTRA_TEXT,
             inputPost.content
         )

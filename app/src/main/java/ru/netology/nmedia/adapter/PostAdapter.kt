@@ -1,5 +1,6 @@
 package ru.netology.nmedia.adapter
 
+import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,7 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
-import ru.netology.nmedia.databinding.CardPostBinding
+import ru.netology.nmedia.databinding.FragmentCardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.numberRepresentation
 
@@ -19,13 +20,14 @@ interface OnInteractionListener {
     fun remove(post: Post)
     fun edit(post: Post)
     fun play(post: Post)
+    fun showPost (post: Post)
 }
 
 class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
     ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = FragmentCardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return PostViewHolder(binding, onInteractionListener)
     }
 
@@ -36,7 +38,7 @@ class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
 }
 
 class PostViewHolder(
-    private val binding: CardPostBinding,
+    private val binding: FragmentCardPostBinding,
     private val onInteractionListener: OnInteractionListener
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {
@@ -44,6 +46,7 @@ class PostViewHolder(
             author.text = post.author
             published.text = post.published
             content.text = post.content
+            content.movementMethod = ScrollingMovementMethod()
             likesIcon.isChecked = post.likedByMe
             likesIcon.text = numberRepresentation(post.likes)
             shareIcon.text = numberRepresentation(post.share)
@@ -87,6 +90,9 @@ class PostViewHolder(
             }
             videoLink.setOnClickListener {
                 onInteractionListener.play(post)
+            }
+            content.setOnClickListener {
+                onInteractionListener.showPost(post)
             }
         }
     }
