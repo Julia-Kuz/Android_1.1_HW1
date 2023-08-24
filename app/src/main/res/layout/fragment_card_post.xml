@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="@dimen/common_spacing">
+    android:padding="@dimen/common_spacing"
+    tools:context=".activity.CardPostFragment">
 
     <ImageView
         android:id="@+id/avatar"
@@ -69,17 +70,19 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/common_spacing"
         android:autoLink="web"
+        android:scrollbarSize="1dp"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toTopOf="@id/videoLink"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/barrier"
-        app:layout_constraintBottom_toTopOf="@id/videoLink"
         tools:text="@sample/posts.json/data/content" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/groupPlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:visibility="visible"
         app:constraint_referenced_ids="videoLink, play" />
 
     <ImageButton

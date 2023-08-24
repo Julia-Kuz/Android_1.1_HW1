@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.MainActivity">
+    tools:context=".activity.MainFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerList"
@@ -13,7 +13,7 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toTopOf="parent"
         tools:itemCount="5"
-        tools:listitem="@layout/card_post">
+        tools:listitem="@layout/fragment_card_post">
 
     </androidx.recyclerview.widget.RecyclerView>
 

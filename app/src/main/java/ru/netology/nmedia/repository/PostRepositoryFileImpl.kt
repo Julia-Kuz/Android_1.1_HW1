@@ -21,7 +21,16 @@ class PostRepositoryFileImpl(
     private val fileNameNextId = "next_id.json"
 
     private var nextId = 1L
+
     private var posts = emptyList<Post>()
+//        set(value) {             //При таком подходе можно убрать эти строки в функциях, так как это делается в сеттере.
+//            field = value
+//            data.value = value
+//           sync()
+//        }
+
+    // НО не работает id. (после повторного включения счетчик сбрасывается) -> ????
+
     private val data = MutableLiveData(posts)
 
     init {
@@ -34,7 +43,7 @@ class PostRepositoryFileImpl(
             }
         } else {
             // если нет, записываем пустой массив
-           emptyList()
+            emptyList()
         }
 
         // то же самое, вариант с вебинара:
@@ -49,11 +58,12 @@ class PostRepositoryFileImpl(
         val nextIdFile = context.filesDir.resolve(fileNameNextId)
         nextId = if (nextIdFile.exists()) {
             nextIdFile.reader().buffered().use {
-                gson.fromJson(it, Long ::class.java)     // ссылка на класс, т.к. id у нас Long
+                gson.fromJson(it, Long::class.java)     // ссылка на класс, т.к. id у нас Long
             }
         } else 1 // или можно nextId (счетчик не сохраняется в памяти и будет выдавать опять "1"
 
         data.value = posts
+
     }
 
     override fun getAll(): LiveData<List<Post>> = data
@@ -128,4 +138,5 @@ class PostRepositoryFileImpl(
         }
 
     }
+
 }

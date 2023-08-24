@@ -13,7 +13,8 @@ class PostRepositorySharedPreferencesImpl(
 ) : PostRepository {
 
     private val gson = Gson() //ссылка на GSON
-    private val prefs = context.getSharedPreferences("repoPref", Context.MODE_PRIVATE) // ссылка на preferences
+    private val prefs =
+        context.getSharedPreferences("repoPref", Context.MODE_PRIVATE) // ссылка на preferences
     private val type = TypeToken.getParameterized(
         List::class.java,
         Post::class.java
