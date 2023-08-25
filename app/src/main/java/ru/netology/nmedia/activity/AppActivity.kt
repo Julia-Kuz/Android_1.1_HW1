@@ -22,17 +22,13 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 return@let
             }
 
-            //intent.removeExtra(Intent.EXTRA_TEXT) -                         // Зачем???
-            findNavController(R.id.nav_host_fragment).navigate(
+            findNavController(R.id.nav_host_fragment).navigate(                //это для share (intent)
                 R.id.action_mainFragment_to_newPostFragment,
                 Bundle().apply {
                     textArg = text
                 }
             )
-
         }
-
-
 
     }
 }

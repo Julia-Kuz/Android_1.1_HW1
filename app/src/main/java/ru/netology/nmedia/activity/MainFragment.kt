@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentMainBinding
@@ -52,7 +53,7 @@ class MainFragment : Fragment() {
                     ) //создается chooser - выбор между приложениями
                 startActivity(shareIntent)
 
-                //viewModel.shareById(post.id)
+                viewModel.shareById(post.id)
             }
 
             override fun view(post: Post) {
@@ -103,7 +104,10 @@ class MainFragment : Fragment() {
         }
 
         binding.addPost.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_newPostFragment)
+            findNavController().navigate(
+                R.id.action_mainFragment_to_newPostFragment,
+                Bundle().apply { textArg = viewModel.draft }
+            )
         }
 
 
