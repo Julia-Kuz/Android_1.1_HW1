@@ -10,5 +10,5 @@ interface PostRepository {
     fun viewById(id: Long)
     fun removeById(id: Long)
     fun save(post: Post)
-
+    fun addLink (id: Long, link: String)
 }

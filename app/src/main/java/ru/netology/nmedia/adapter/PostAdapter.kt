@@ -21,6 +21,7 @@ interface OnInteractionListener {
     fun edit(post: Post)
     fun play(post: Post)
     fun showPost (post: Post)
+    fun addLink (id: Long, link: String)
 }
 
 class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
@@ -51,6 +52,7 @@ class PostViewHolder(
             likesIcon.text = numberRepresentation(post.likes)
             shareIcon.text = numberRepresentation(post.share)
             viewIcon.text = numberRepresentation(post.views)
+            groupLink.visibility = View.GONE
 
             if (post.videoLink != null) {
                 groupPlay.visibility = View.VISIBLE
@@ -94,6 +96,14 @@ class PostViewHolder(
             content.setOnClickListener {
                 onInteractionListener.showPost(post)
             }
+
+            linkIcon.setOnClickListener {
+                groupLink.visibility = View.VISIBLE
+                linkSave.setOnClickListener {
+                    onInteractionListener.addLink(post.id, videoLinkText.toString())
+                }
+            }
+
         }
     }
 }
