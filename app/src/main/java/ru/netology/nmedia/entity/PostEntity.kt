@@ -3,6 +3,9 @@ package ru.netology.nmedia.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import ru.netology.nmedia.dto.Post
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Entity (tableName = "PostEntity") //по умолчанию имя таблицы = названию класса, при желании можно изменить здесь, в кругых скобках
 data class PostEntity(
@@ -22,7 +25,7 @@ data class PostEntity(
 
     companion object {
         fun fromDto(dto: Post) =
-            PostEntity(dto.id, dto.author, dto.content, dto.published, dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink)
+            PostEntity(dto.id, dto.author, dto.content, published = SimpleDateFormat("dd MMM yyyy в HH:mm", Locale.getDefault()).format(Date()).toString(), dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink)
 
     }
 }

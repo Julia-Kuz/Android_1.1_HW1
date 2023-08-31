@@ -20,15 +20,16 @@ interface OnInteractionListener {
     fun remove(post: Post)
     fun edit(post: Post)
     fun play(post: Post)
-    fun showPost (post: Post)
-    fun addLink (id: Long, link: String)
+    fun showPost(post: Post)
+    fun addLink(id: Long, link: String)
 }
 
 class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
     ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        val binding = FragmentCardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            FragmentCardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return PostViewHolder(binding, onInteractionListener)
     }
 
@@ -100,7 +101,9 @@ class PostViewHolder(
             linkIcon.setOnClickListener {
                 groupLink.visibility = View.VISIBLE
                 linkSave.setOnClickListener {
-                    onInteractionListener.addLink(post.id, videoLinkText.toString())
+                    if (videoLinkText.text.toString().isNotBlank()) {
+                        onInteractionListener.addLink(post.id, videoLinkText.text.toString())
+                    } else groupLink.visibility = View.GONE
                 }
             }
 

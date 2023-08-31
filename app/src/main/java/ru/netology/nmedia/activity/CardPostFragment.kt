@@ -115,8 +115,9 @@ class CardPostFragment : Fragment() {
                 linkIcon.setOnClickListener {
                     groupLink.visibility = View.VISIBLE
                     linkSave.setOnClickListener {
-                        val link = videoLinkText.toString()
-                        link.isNotBlank().let { viewModel.addLink(post.id, link) }
+                        if (videoLinkText.text.toString().isNotBlank()) {
+                            viewModel.addLink(post.id, videoLinkText.text.toString())
+                        } else groupLink.visibility = View.GONE
                     }
                 }
             }
@@ -136,9 +137,10 @@ class CardPostFragment : Fragment() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = file
         }
-        //requireActivity().startActivity(intent)
-        //(activity as AppActivity).startActivity(intent)
-        startActivity(intent)
+        val packageManager = requireActivity().packageManager
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        }
     }
 
 }

@@ -72,14 +72,11 @@ class MainFragment : Fragment() {
             }
 
             override fun play(post: Post) {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoLink)) // в ДЗ
-                //requireActivity().startActivity(intent)
-                // (activity as AppActivity).startActivity(intent)
-                startActivity(intent)
-
-//                if (intent.resolveActivity(packageManager) != null) {          //c фрагментами горит красным
-//                    startActivity(intent)
-//                }
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoLink))
+                val packageManager = requireActivity().packageManager
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                }
             }
 
             override fun showPost(post: Post) {
@@ -88,7 +85,7 @@ class MainFragment : Fragment() {
             }
 
             override fun addLink(id: Long, link: String) {
-                link.isNotBlank().let { viewModel.addLink(id, link) }
+                viewModel.addLink(id, link)
             }
         }
         )
