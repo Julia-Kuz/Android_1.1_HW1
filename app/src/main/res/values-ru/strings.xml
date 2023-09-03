@@ -19,5 +19,6 @@
     <string name="chooser_share_post">Поделиться</string>
     <string name="save">Сохранить</string>
     <string name="chooser_view_link">Открыть с помощью</string>
+    <string name="link">Ссылка</string>
 
 </resources>

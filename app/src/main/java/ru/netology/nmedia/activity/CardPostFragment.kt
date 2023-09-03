@@ -49,6 +49,7 @@ class CardPostFragment : Fragment() {
                 likesIcon.text = numberRepresentation(post.likes)
                 shareIcon.text = numberRepresentation(post.share)
                 viewIcon.text = numberRepresentation(post.views)
+                groupLink.visibility = View.GONE
 
                 if (post.videoLink != null) {
                     groupPlay.visibility = View.VISIBLE
@@ -58,6 +59,7 @@ class CardPostFragment : Fragment() {
                 likesIcon.setOnClickListener {
                     viewModel.likeById(post.id)
                 }
+
                 shareIcon.setOnClickListener {
                     val intent = Intent().apply {
                         action = Intent.ACTION_SEND
@@ -71,7 +73,9 @@ class CardPostFragment : Fragment() {
                         ) //создается chooser - выбор между приложениями
                     startActivity(shareIntent)
 
+                    viewModel.shareById(post.id)
                 }
+
                 viewIcon.setOnClickListener {
                     viewModel.viewById(post.id)
                 }
@@ -107,6 +111,15 @@ class CardPostFragment : Fragment() {
                 videoLink.setOnClickListener {
                     playMedia(Uri.parse(post.videoLink))
                 }
+
+                linkIcon.setOnClickListener {
+                    groupLink.visibility = View.VISIBLE
+                    linkSave.setOnClickListener {
+                        if (videoLinkText.text.toString().isNotBlank()) {
+                            viewModel.addLink(post.id, videoLinkText.text.toString())
+                        } else groupLink.visibility = View.GONE
+                    }
+                }
             }
         }
 
@@ -124,7 +137,10 @@ class CardPostFragment : Fragment() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = file
         }
-        startActivity(intent)
+        val packageManager = requireActivity().packageManager
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        }
     }
 
 }

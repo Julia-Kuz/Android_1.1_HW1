@@ -1,5 +1,6 @@
 package ru.netology.nmedia.activity
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -15,6 +16,7 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentMainBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.util.Constants
 import ru.netology.nmedia.util.PostDealtWith
 import ru.netology.nmedia.viewModel.PostViewModel
 
@@ -70,27 +72,25 @@ class MainFragment : Fragment() {
             }
 
             override fun play(post: Post) {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoLink)) // в ДЗ
-                startActivity(intent)
-
-//                val intent =
-//                    Intent(Intent.ACTION_VIEW).apply {             //на сайте https://developer.android.com/guide/components/intents-common#Music
-//                        data = Uri.parse(post.videoLink)
-//                    }
-//                if (intent.resolveActivity(packageManager) != null) {          //c фрагментами горит красным
-//                    startActivity(intent)
-//                }
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoLink))
+                val packageManager = requireActivity().packageManager
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                }
             }
 
             override fun showPost(post: Post) {
                 PostDealtWith.savePostDealtWith(post)
                 findNavController().navigate(R.id.action_mainFragment_to_cardPostFragment)
             }
+
+            override fun addLink(id: Long, link: String) {
+                viewModel.addLink(id, link)
+            }
         }
         )
 
         binding.recyclerList.adapter = adapter  // получаю доступ к RecyclerView
-
 
         viewModel.data.observe(viewLifecycleOwner) { posts ->
             val newPost =
@@ -106,10 +106,16 @@ class MainFragment : Fragment() {
         binding.addPost.setOnClickListener {
             findNavController().navigate(
                 R.id.action_mainFragment_to_newPostFragment,
-                Bundle().apply { textArg = viewModel.draft }
+                // Bundle().apply { textArg = viewModel.draft }             // черновик с помощью VieModel
+                Bundle().apply {
+                    val text = (activity as AppActivity).getSharedPreferences(
+                        Constants.DRAFT_PREF_NAME,
+                        Context.MODE_PRIVATE
+                    ).getString(Constants.DRAFT_KEY, "")
+                    textArg = text
+                }
             )
         }
-
 
         return binding.root
     }

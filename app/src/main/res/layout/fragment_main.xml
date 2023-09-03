@@ -13,6 +13,7 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toTopOf="parent"
         tools:itemCount="5"
+        tools:layout_editor_absoluteX="16dp"
         tools:listitem="@layout/fragment_card_post">
 
     </androidx.recyclerview.widget.RecyclerView>

@@ -18,5 +18,6 @@
     <string name="chooser_share_post">Share post</string>
     <string name="chooser_view_link">Open link</string>
     <string name="save">save</string>
+    <string name="link">Link</string>
 
 </resources>

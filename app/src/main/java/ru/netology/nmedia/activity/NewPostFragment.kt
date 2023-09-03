@@ -1,5 +1,6 @@
 package ru.netology.nmedia.activity
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.util.AndroidUtils
+import ru.netology.nmedia.util.Constants
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewModel.PostViewModel
 
@@ -40,13 +42,21 @@ class NewPostFragment : Fragment() {
 
         binding.ok.setOnClickListener {
             viewModel.changeContentAndSave(binding.addContent.text.toString())
-            viewModel.draft = ""
+           // viewModel.draft = ""                        //  черновик с помощью VieModel
+            (activity as AppActivity).getSharedPreferences(Constants.DRAFT_PREF_NAME, Context.MODE_PRIVATE).edit().apply {
+                putString(Constants.DRAFT_KEY, "")
+                apply()
+            }
             AndroidUtils.hideKeyboard(requireView())
             findNavController().navigateUp()
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
-            viewModel.draft = binding.addContent.text.toString()
+           // viewModel.draft = binding.addContent.text.toString()       // черновик с помощью VieModel
+            (activity as AppActivity).getSharedPreferences(Constants.DRAFT_PREF_NAME, Context.MODE_PRIVATE).edit().apply {
+                putString(Constants.DRAFT_KEY, binding.addContent.text.toString())
+                apply()
+            }
             findNavController().navigateUp()
         }
 
