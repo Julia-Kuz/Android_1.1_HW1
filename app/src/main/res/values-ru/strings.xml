@@ -20,5 +20,9 @@
     <string name="save">Сохранить</string>
     <string name="chooser_view_link">Открыть с помощью</string>
     <string name="link">Ссылка</string>
+    <string name="notification_user_liked">Пользователь %1$s поставил лайк посту пользователя %2$s</string>
+    <string name="channel_remote_name">Уведомление с сервера</string>
+    <string name="channel_remote_description">Уведомление с удаленного сервера</string>
+    <string name="notification_user_posted">Пользователь %1$s опубликовал новый пост: %2$s</string>
 
 </resources>
