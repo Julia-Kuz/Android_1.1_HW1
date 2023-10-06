@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -92,15 +93,27 @@ class MainFragment : Fragment() {
 
         binding.recyclerList.adapter = adapter  // получаю доступ к RecyclerView
 
-        viewModel.data.observe(viewLifecycleOwner) { posts ->
+        viewModel.data.observe(viewLifecycleOwner) { state ->
             val newPost =
-                posts.size > adapter.currentList.size //проверяем, что это добавление поста, а не др действие (лайк и т.п.)
+                state.posts.size > adapter.currentList.size //проверяем, что это добавление поста, а не др действие (лайк и т.п.)
 
-            adapter.submitList(posts) {
+            adapter.submitList(state.posts) {
                 if (newPost) {
                     binding.recyclerList.smoothScrollToPosition(0)
                 } // scroll к верхнему сообщению только при добавлении
             }
+            binding.progress.isVisible = state.loading
+            binding.errorGroup.isVisible = state.error
+            binding.emptyText.isVisible = state.empty
+        }
+
+        binding.retryButton.setOnClickListener {
+            viewModel.load()
+        }
+
+        binding.swiperefresh.setOnRefreshListener {
+            viewModel.load()
+            binding.swiperefresh.isRefreshing = false
         }
 
         binding.addPost.setOnClickListener {

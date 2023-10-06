@@ -48,7 +48,7 @@ class NewPostFragment : Fragment() {
                 apply()
             }
             AndroidUtils.hideKeyboard(requireView())
-            findNavController().navigateUp()
+           // findNavController().navigateUp()  //переносим в подписку на postCreated (Life Cycle Event)
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
@@ -57,6 +57,10 @@ class NewPostFragment : Fragment() {
                 putString(Constants.DRAFT_KEY, binding.addContent.text.toString())
                 apply()
             }
+           // findNavController().navigateUp()
+        }
+
+        viewModel.postCreated.observe(viewLifecycleOwner) {
             findNavController().navigateUp()
         }
 

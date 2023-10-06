@@ -125,8 +125,8 @@ class CardPostFragment : Fragment() {
 
         fill(post)
 
-        viewModel.data.observe(viewLifecycleOwner) { posts ->
-            posts.find { it.id == post.id }?.let { fill(it.copy()) }
+        viewModel.data.observe(viewLifecycleOwner) {state ->
+            state.posts.find { it.id == post.id }?.let { fill(it.copy()) }
         }
 
         return binding.root
