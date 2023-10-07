@@ -87,8 +87,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         val flag = data.value?.posts?.find { it.id == id }?.likedByMe
         if (flag != null) {
             thread {
-                repository.likeById(id, flag = flag)
-                load()
+                val postLike = repository.likeById(id, flag = flag)
+                val updatedPosts = _data.value?.posts?.map {
+                    if (it.id==id) {
+                        postLike
+                    } else {it}
+                }.orEmpty()
+
+                _data.postValue(FeedModelState(posts = updatedPosts))
             }
         }
     }

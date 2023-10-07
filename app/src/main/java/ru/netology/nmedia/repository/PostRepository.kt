@@ -5,7 +5,7 @@ import ru.netology.nmedia.dto.Post
 
 interface PostRepository {
     fun getAll(): List<Post>
-    fun likeById(id: Long, flag: Boolean)
+    fun likeById(id: Long, flag: Boolean): Post
     fun shareById(id: Long)
     fun viewById(id: Long)
     fun removeById(id: Long)

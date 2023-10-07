@@ -46,14 +46,14 @@ class PostRepositoryImpl : PostRepository {
 //            }
     }
 
-    override fun likeById(id: Long, flag: Boolean) {
+    override fun likeById(id: Long, flag: Boolean) : Post {
         if (!flag) {
             val request = Request.Builder()
                 .url("${BASE_URL}/posts/${id}/likes")
                 .post(gson.toJson("${BASE_URL}/posts/${id}/likes").toRequestBody(jsonType))
                 .build()
 
-            client.newCall(request)
+            return client.newCall(request)
                 .execute()
                 .let { it.body?.string() }
                 .let {
@@ -65,7 +65,7 @@ class PostRepositoryImpl : PostRepository {
                 .delete(gson.toJson("${BASE_URL}/posts/${id}/likes").toRequestBody(jsonType))
                 .build()
 
-            client.newCall(request)
+            return client.newCall(request)
                 .execute()
                 .let { it.body?.string() }
                 .let {
