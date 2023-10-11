@@ -108,11 +108,11 @@ class MainFragment : Fragment() {
         }
 
         binding.retryButton.setOnClickListener {
-            viewModel.load()
+            viewModel.loadPosts()
         }
 
         binding.swiperefresh.setOnRefreshListener {
-            viewModel.load()
+            viewModel.loadPosts()
             binding.swiperefresh.isRefreshing = false
         }
 
