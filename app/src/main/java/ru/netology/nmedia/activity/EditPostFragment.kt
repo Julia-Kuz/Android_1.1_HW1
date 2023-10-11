@@ -39,6 +39,10 @@ class EditPostFragment : Fragment() {
         binding.saveButton.setOnClickListener {
             val postEdited = post.copy(content = binding.editContent.text.toString())
             viewModel.edit(postEdited)
+            //findNavController().navigateUp()
+        }
+
+        viewModel.postCreated.observe(viewLifecycleOwner) {
             findNavController().navigateUp()
         }
 
