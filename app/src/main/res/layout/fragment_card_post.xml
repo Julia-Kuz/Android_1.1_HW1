@@ -68,32 +68,52 @@
         android:id="@+id/content"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/common_spacing"
+        android:layout_marginBottom="@dimen/common_spacing"
         android:autoLink="web"
         android:scrollbarSize="1dp"
         android:scrollbars="vertical"
-        app:layout_constraintBottom_toTopOf="@id/videoLink"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/barrier"
         tools:text="@sample/posts.json/data/content" />
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrierMiddle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="content" />
+
+    <ImageView
+        android:id="@+id/attachmentImage"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_marginTop="@dimen/common_spacing"
+        app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
+        app:layout_constraintBottom_toTopOf="@id/videoLinkText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- android:layout_height="wrap_content"  - НЕ РАБОТАЕТ ??-->
+
+
     <androidx.constraintlayout.widget.Group
         android:id="@+id/groupPlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="visible"
+        android:visibility="gone"
         app:constraint_referenced_ids="videoLink, play" />
 
     <ImageButton
         android:id="@+id/videoLink"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/common_spacing"
         android:src="@drawable/ic_youtube_seeklogo_com"
-        app:layout_constraintBottom_toTopOf="@id/barrierBottom"
-        app:layout_constraintEnd_toEndOf="@id/content"
-        app:layout_constraintStart_toStartOf="@id/content"
-        app:layout_constraintTop_toBottomOf="@id/content" />
+        app:layout_constraintBottom_toTopOf="@id/videoLinkText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/barrierMiddle" />
 
     <ImageButton
         android:id="@+id/play"
@@ -105,6 +125,34 @@
         app:layout_constraintStart_toStartOf="@id/videoLink"
         app:layout_constraintTop_toTopOf="@id/videoLink" />
 
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/groupLink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="videoLinkText, linkSave" />
+
+    <EditText
+        android:id="@+id/videoLinkText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:hint="Your video link"
+        android:inputType="textMultiLine"
+        app:layout_constraintBottom_toTopOf="@id/barrierBottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/linkSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_save_check_24"
+        app:layout_constraintBottom_toBottomOf="@id/videoLinkText"
+        app:layout_constraintEnd_toEndOf="@id/videoLinkText"
+        app:layout_constraintTop_toTopOf="@id/videoLinkText" />
+
+
     <!--   Reactions    -->
 
     <com.google.android.material.button.MaterialButton
@@ -112,6 +160,7 @@
         style="@style/Widget.AppTheme.LikeButton"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
+        android:layout_marginTop="@dimen/common_spacing"
         android:contentDescription="@string/description_likeIcon"
         app:layout_constraintEnd_toStartOf="@id/shareIcon"
         app:layout_constraintStart_toStartOf="parent"
@@ -138,35 +187,6 @@
         app:layout_constraintBottom_toBottomOf="@id/likesIcon"
         app:layout_constraintStart_toEndOf="@id/shareIcon"
         app:layout_constraintTop_toTopOf="@id/likesIcon" />
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/groupLink"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        app:constraint_referenced_ids="videoLinkText, linkSave" />
-
-    <EditText
-        android:id="@+id/videoLinkText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:hint="Your video link"
-        android:inputType="textMultiLine"
-        app:layout_constraintBottom_toTopOf="@id/barrierBottom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/videoLink" />
-
-    <ImageButton
-        android:id="@+id/linkSave"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_save_check_24"
-        app:layout_constraintBottom_toBottomOf="@id/videoLinkText"
-        app:layout_constraintEnd_toEndOf="@id/videoLinkText"
-        app:layout_constraintTop_toTopOf="@id/videoLinkText" />
-
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/viewIcon"

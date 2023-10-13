@@ -1,5 +1,10 @@
 package ru.netology.nmedia
 
+import android.widget.ImageView
+import androidx.core.view.marginEnd
+import androidx.core.view.marginTop
+import com.bumptech.glide.Glide
+
 fun numberRepresentation(number: Int): String {
 
     return when (number) {
@@ -17,6 +22,25 @@ fun numberRepresentation(number: Int): String {
                 ((number.toDouble()) / 1000_000).toString().take(3) + "M"
         }
     }
+}
+
+fun ImageView.loadCircle (url: String) {
+    Glide.with(this)
+        .load(url)
+        .placeholder(R.drawable.ic_downloading_24)
+        .error(R.drawable.ic_error_24)
+        .timeout(10_000)
+        .circleCrop()
+        .into(this)
+}
+
+fun ImageView.load (url: String) {
+    Glide.with(this)
+        .load(url)
+        .placeholder(R.drawable.ic_downloading_24)
+        .error(R.drawable.ic_error_24)
+        .timeout(10_000)
+        .into(this)
 }
 
 
