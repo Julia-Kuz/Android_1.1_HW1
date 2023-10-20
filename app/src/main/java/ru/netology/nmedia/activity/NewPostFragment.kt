@@ -9,6 +9,7 @@ import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.util.Constants
@@ -62,6 +63,10 @@ class NewPostFragment : Fragment() {
 
         viewModel.postCreated.observe(viewLifecycleOwner) {
             findNavController().navigateUp()
+        }
+
+        viewModel.postCreatedError.observe(viewLifecycleOwner) {
+            findNavController().navigate(R.id.action_newPostFragment_to_errorFragment)
         }
 
         return binding.root

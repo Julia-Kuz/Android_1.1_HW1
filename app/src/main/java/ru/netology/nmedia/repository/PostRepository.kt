@@ -13,7 +13,7 @@ interface PostRepository {
 
     fun getAllAsync(callback: GetMyCallback <List <Post>>)
     fun likeByIdAsync (id: Long, flag: Boolean, callback: GetMyCallback <Post>)
-    fun removeByIdAsync(id: Long, callback: GetMyCallback <Boolean>)
+    fun removeByIdAsync(id: Long, callback: GetMyCallback <Unit>)
     fun saveAsync(post: Post, callback: GetMyCallback <Post>)
 
     interface GetMyCallback <T> {

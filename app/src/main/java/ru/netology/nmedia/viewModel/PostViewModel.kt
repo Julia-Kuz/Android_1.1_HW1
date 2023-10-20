@@ -30,6 +30,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit> = _postCreated
 
+    private val _postCreatedError = SingleLiveEvent<Unit>()
+    val postCreatedError: LiveData<Unit> = _postCreatedError
+
     val edited = MutableLiveData(defaultPost)
     var link = null
     // var draft: String = ""   // для черновика
@@ -42,10 +45,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         _data.postValue(FeedModelState(loading = true)) //показываем, что идет загрузка
         repository.getAllAsync(object : PostRepository.GetMyCallback<List<Post>> {
             override fun onSuccess(result: List<Post>) {
-                _data.postValue(FeedModelState(posts = result, empty = result.isEmpty()))
+               // _data.postValue(FeedModelState(posts = result, empty = result.isEmpty())) // Okhttp, фоновый поток
+                _data.value = FeedModelState(posts = result, empty = result.isEmpty()) //retrofit, теперь с главного потока
             }
             override fun onError(e: Exception) {
-                _data.postValue(FeedModelState(error = true))
+               // _data.postValue(FeedModelState(error = true))  // Okhttp, фоновый поток
+                _data.value = FeedModelState(error = true) //retrofit, теперь с главного потока
             }
 
         })
@@ -59,16 +64,17 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                     itPost.copy(content = text),
                     object : PostRepository.GetMyCallback<Post> {
                         override fun onSuccess(result: Post) {
-                            _postCreated.postValue(Unit)
+                            _postCreated.value = Unit
                             loadPosts()
                         }
                         override fun onError(e: Exception) {
-                            _data.postValue(FeedModelState(error = true))
+                            _postCreatedError.value = Unit
+                            //_data.value = FeedModelState(error = true)
                         }
                     })
             }
         }
-        edited.postValue(defaultPost) // поскольку фоновый поток, используем метод postValue(), а не setValue()
+        edited.value = defaultPost
     }
 
     fun likeById(id: Long) {
@@ -84,11 +90,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     }.orEmpty()
 
-                    _data.postValue(FeedModelState(posts = updatedPosts))
+                    _data.value = FeedModelState(posts = updatedPosts)
                 }
 
                 override fun onError(e: Exception) {
-                    _data.postValue(FeedModelState(error = true))
+                    _data.value = FeedModelState(error = true)
                 }
             })
         }
@@ -101,12 +107,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
         val old = _data.value?.posts.orEmpty()
 
-        repository.removeByIdAsync(id, object : PostRepository.GetMyCallback <Boolean>{
-            override fun onSuccess(result: Boolean) {
-                _data.postValue( FeedModelState(posts = _data.value?.posts.orEmpty().filter { it.id != id }))
+        repository.removeByIdAsync(id, object : PostRepository.GetMyCallback <Unit>{
+            override fun onSuccess(result: Unit) {
+                _data.value = FeedModelState(posts = _data.value?.posts.orEmpty().filter { it.id != id })
             }
             override fun onError(e: Exception) {
-                _data.postValue(FeedModelState(posts = old))
+                _data.value = FeedModelState(posts = old)
             }
         })
     }
@@ -119,17 +125,18 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value?.let {
             repository.saveAsync(it, object : PostRepository.GetMyCallback<Post> {
                 override fun onSuccess(result: Post) {
-                    _postCreated.postValue(Unit)
+                    _postCreated.value = Unit
                     loadPosts()
                 }
 
                 override fun onError(e: Exception) {
-                    _data.postValue(FeedModelState(error = true))
+                    _postCreatedError.value = Unit
+                    //_data.value = FeedModelState(error = true)
                 }
 
             })
         }
-        edited.postValue(defaultPost)
+        edited.value = defaultPost
     }
 
 
