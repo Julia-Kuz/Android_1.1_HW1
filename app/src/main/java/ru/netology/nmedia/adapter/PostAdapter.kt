@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.load
+import ru.netology.nmedia.loadCircle
 import ru.netology.nmedia.numberRepresentation
 
 interface OnInteractionListener {
@@ -58,6 +60,23 @@ class PostViewHolder(
             if (post.videoLink != null) {
                 groupPlay.visibility = View.VISIBLE
             } else groupPlay.visibility = View.GONE
+
+            //**** ДЗ Glide
+
+            val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+            avatar.loadCircle(url)
+
+            if (post.attachment != null) {
+                post.attachment.url?.let {
+                    val url = "http://10.0.2.2:9999/images/${it}"
+                    attachmentImage.load(url)
+                }
+                attachmentImage.visibility = View.VISIBLE
+            } else {
+                attachmentImage.visibility = View.GONE
+            }
+
+            //****
 
             likesIcon.setOnClickListener {
                 onInteractionListener.like(post)

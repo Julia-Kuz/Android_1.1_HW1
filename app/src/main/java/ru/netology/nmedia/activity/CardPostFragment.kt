@@ -14,6 +14,8 @@ import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.load
+import ru.netology.nmedia.loadCircle
 import ru.netology.nmedia.numberRepresentation
 import ru.netology.nmedia.util.PostDealtWith
 import ru.netology.nmedia.viewModel.PostViewModel
@@ -54,6 +56,23 @@ class CardPostFragment : Fragment() {
                 if (post.videoLink != null) {
                     groupPlay.visibility = View.VISIBLE
                 } else groupPlay.visibility = View.GONE
+
+                //**** ДЗ Glide
+
+                val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+                avatar.loadCircle(url)
+
+                if (post.attachment != null) {
+                    post.attachment.url?.let {
+                        val url = "http://10.0.2.2:9999/images/${it}"
+                        attachmentImage.load (url)
+                    }
+                    attachmentImage.visibility = View.VISIBLE
+                } else {
+                    attachmentImage.visibility = View.GONE
+                }
+
+                //****
 
 
                 likesIcon.setOnClickListener {
