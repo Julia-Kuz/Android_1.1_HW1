@@ -27,7 +27,5 @@
     <string name="error_loading">Error loading</string>
     <string name="retry_loading">Retry loading</string>
     <string name="no_posts">No posts</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
