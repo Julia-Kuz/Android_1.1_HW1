@@ -18,14 +18,18 @@ data class PostEntity(
     val likedByMe: Boolean,
     val share: Int,
     val views: Int,
-    val videoLink: String?
+    val videoLink: String?,
+    val saved: Boolean
 
 ) {
-    fun toDto() = Post(id, author, content, published, likes, likedByMe, share, views, videoLink)
+    fun toDto() = Post(id, author, content, published, likes, likedByMe, share, views, videoLink, saved)
 
     companion object {
         fun fromDto(dto: Post) =
-            PostEntity(dto.id, dto.author, dto.content, published = SimpleDateFormat("dd MMM yyyy в HH:mm", Locale.getDefault()).format(Date()).toString(), dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink)
+            PostEntity(dto.id, dto.author, dto.content, published = SimpleDateFormat("dd MMM yyyy в HH:mm", Locale.getDefault()).format(Date()).toString(), dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink, dto.saved)
 
     }
 }
+
+fun List<PostEntity>.toDto(): List<Post> = map(PostEntity::toDto)
+fun List<Post>.toEntity(): List<PostEntity> = map(PostEntity::fromDto)

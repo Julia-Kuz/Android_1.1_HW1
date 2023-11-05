@@ -74,8 +74,16 @@
         android:scrollbars="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/barrier"
+        app:layout_constraintTop_toBottomOf="@id/serverLoad"
         tools:text="@sample/posts.json/data/content" />
+
+    <ImageView
+        android:id="@+id/serverLoad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/content"
+        app:layout_constraintTop_toBottomOf="@id/barrier"
+        android:src="@drawable/ic_cloud_queue_24"/>
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrierMiddle"

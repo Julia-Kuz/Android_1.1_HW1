@@ -57,6 +57,10 @@ class CardPostFragment : Fragment() {
                     groupPlay.visibility = View.VISIBLE
                 } else groupPlay.visibility = View.GONE
 
+                if (post.saved) {
+                    serverLoad.visibility = View.GONE
+                } else serverLoad.visibility = View.VISIBLE
+
                 //**** ДЗ Glide
 
                 val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
@@ -144,8 +148,8 @@ class CardPostFragment : Fragment() {
 
         fill(post)
 
-        viewModel.data.observe(viewLifecycleOwner) {state ->
-            state.posts.find { it.id == post.id }?.let { fill(it.copy()) }
+        viewModel.data.observe(viewLifecycleOwner) {feedModel ->
+            feedModel.posts.find { it.id == post.id }?.let { fill(it.copy()) }
         }
 
         return binding.root

@@ -61,10 +61,14 @@ class PostViewHolder(
                 groupPlay.visibility = View.VISIBLE
             } else groupPlay.visibility = View.GONE
 
+            if (post.saved) {
+                serverLoad.visibility = View.GONE
+            } else serverLoad.visibility = View.VISIBLE
+
             //**** ДЗ Glide
 
-            val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
-            avatar.loadCircle(url)
+            val urlAvatar = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+            avatar.loadCircle(urlAvatar)
 
             if (post.attachment != null) {
                 post.attachment.url?.let {

@@ -46,7 +46,7 @@ class EditPostFragment : Fragment() {
 
         binding.saveButton.setOnClickListener {
             val postEdited = post.copy(content = binding.editContent.text.toString())
-            viewModel.edit(postEdited)
+            viewModel.edit(postEdited.copy())
             //findNavController().navigateUp()
         }
 
