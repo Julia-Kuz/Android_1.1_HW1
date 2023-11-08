@@ -89,7 +89,7 @@ class MainFragment : Fragment() {
                 viewModel.addLink(id, link)
             }
 
-            override fun retry(content: String) {
+            override fun retryPost(content: String) {
                 viewModel.changeContentAndSave(content)
             }
         }
