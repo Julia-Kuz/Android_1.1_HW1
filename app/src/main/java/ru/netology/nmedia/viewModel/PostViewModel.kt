@@ -20,7 +20,7 @@ private val defaultPost = Post(
     content = "",
     author = "",
     likedByMe = false,
-    published = "",
+    published = 0L,
     videoLink = null
 )
 
@@ -93,7 +93,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 repository.save(post.copy(saved = false))
                 _postCreated.value = Unit
-                loadPosts()
             } catch (e: Exception) {
                 _postCreatedError.value = Unit
             }

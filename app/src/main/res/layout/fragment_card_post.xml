@@ -84,6 +84,21 @@
         app:layout_constraintStart_toStartOf="@id/content"
         app:layout_constraintTop_toBottomOf="@id/barrier"
         android:src="@drawable/ic_cloud_queue_24"/>
+    <ImageView
+        android:id="@+id/serverRetry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/serverLoad"
+        android:layout_marginStart="@dimen/common_spacing"
+        app:layout_constraintTop_toBottomOf="@id/barrier"
+        android:src="@drawable/ic_replay_circle_filled_24"/>
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/serverGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="serverLoad,serverRetry" />
+
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrierMiddle"

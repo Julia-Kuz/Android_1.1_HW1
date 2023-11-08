@@ -11,9 +11,9 @@ import java.util.Locale
 data class PostEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
-    val author: String?,
-    val content: String?,
-    val published: String?,
+    val author: String,
+    val content: String,
+    val published: Long,
     val likes: Int,
     val likedByMe: Boolean,
     val share: Int,
@@ -26,7 +26,7 @@ data class PostEntity(
 
     companion object {
         fun fromDto(dto: Post) =
-            PostEntity(dto.id, dto.author, dto.content, published = SimpleDateFormat("dd MMM yyyy в HH:mm", Locale.getDefault()).format(Date()).toString(), dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink, dto.saved)
+            PostEntity(dto.id, dto.author, dto.content, dto.published, dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink, dto.saved)
 
     }
 }

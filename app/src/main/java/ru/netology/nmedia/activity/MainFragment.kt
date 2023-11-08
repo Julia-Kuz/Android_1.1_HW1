@@ -88,6 +88,10 @@ class MainFragment : Fragment() {
             override fun addLink(id: Long, link: String) {
                 viewModel.addLink(id, link)
             }
+
+            override fun retry(content: String) {
+                viewModel.changeContentAndSave(content)
+            }
         }
         )
 

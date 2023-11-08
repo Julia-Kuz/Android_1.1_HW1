@@ -1,6 +1,8 @@
 package ru.netology.nmedia.activity
 
+import android.content.Context
 import android.content.Intent
+import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
@@ -17,8 +19,12 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.load
 import ru.netology.nmedia.loadCircle
 import ru.netology.nmedia.numberRepresentation
+import ru.netology.nmedia.util.AndroidUtils
+import ru.netology.nmedia.util.Constants
 import ru.netology.nmedia.util.PostDealtWith
 import ru.netology.nmedia.viewModel.PostViewModel
+import java.util.Date
+import java.util.Locale
 
 class CardPostFragment : Fragment() {
 
@@ -45,7 +51,7 @@ class CardPostFragment : Fragment() {
             with(binding) {
 
                 author.text = post.author
-                published.text = post.published
+                published.text = SimpleDateFormat("dd MMM yyyy в HH:mm", Locale.getDefault()).format(Date(post.published))
                 content.text = post.content
                 likesIcon.isChecked = post.likedByMe
                 likesIcon.text = numberRepresentation(post.likes)
@@ -58,8 +64,8 @@ class CardPostFragment : Fragment() {
                 } else groupPlay.visibility = View.GONE
 
                 if (post.saved) {
-                    serverLoad.visibility = View.GONE
-                } else serverLoad.visibility = View.VISIBLE
+                    serverGroup.visibility = View.GONE
+                } else serverGroup.visibility = View.VISIBLE
 
                 //**** ДЗ Glide
 
@@ -142,6 +148,10 @@ class CardPostFragment : Fragment() {
                             viewModel.addLink(post.id, videoLinkText.text.toString())
                         } else groupLink.visibility = View.GONE
                     }
+                }
+
+                binding.serverRetry.setOnClickListener {
+                    viewModel.changeContentAndSave(binding.content.text.toString())
                 }
             }
         }
