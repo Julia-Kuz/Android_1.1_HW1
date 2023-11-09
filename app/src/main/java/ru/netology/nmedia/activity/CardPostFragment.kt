@@ -51,7 +51,8 @@ class CardPostFragment : Fragment() {
             with(binding) {
 
                 author.text = post.author
-                published.text = SimpleDateFormat("dd MMM yyyy в HH:mm", Locale.getDefault()).format(Date(post.published))
+                published.text = SimpleDateFormat("dd MMM yyyy в HH:mm", Locale.getDefault()).format(Date((post.published * 1000)))
+                //post.published нужно умножить на 1000, так как Date() ожидает время в миллисекундах.
                 content.text = post.content
                 likesIcon.isChecked = post.likedByMe
                 likesIcon.text = numberRepresentation(post.likes)
@@ -72,8 +73,8 @@ class CardPostFragment : Fragment() {
                 val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
                 avatar.loadCircle(url)
 
-                if (post.attachment != null) {
-                    post.attachment.url?.let {
+                if (post.attachment?.url != null) {
+                    post.attachment.url.let {
                         val url = "http://10.0.2.2:9999/images/${it}"
                         attachmentImage.load (url)
                     }

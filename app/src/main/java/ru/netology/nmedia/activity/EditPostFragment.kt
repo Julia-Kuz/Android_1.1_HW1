@@ -15,7 +15,9 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentEditPostBinding
+import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.load
+import ru.netology.nmedia.util.AttachmentType
 import ru.netology.nmedia.util.PostDealtWith
 import ru.netology.nmedia.viewModel.PostViewModel
 
@@ -46,7 +48,12 @@ class EditPostFragment : Fragment() {
 
         binding.saveButton.setOnClickListener {
             val postEdited = post.copy(content = binding.editContent.text.toString())
-            viewModel.edit(postEdited.copy())
+            if (postEdited.attachment?.url != null) {
+                viewModel.edit(postEdited.copy())
+            } else {
+                viewModel.edit(postEdited.copy(attachment = null))
+            }
+
             //findNavController().navigateUp()
         }
 

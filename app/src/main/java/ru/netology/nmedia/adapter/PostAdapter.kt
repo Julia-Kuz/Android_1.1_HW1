@@ -53,7 +53,7 @@ class PostViewHolder(
         binding.apply {
             author.text = post.author
             published.text = SimpleDateFormat("dd MMM yyyy в HH:mm", Locale.getDefault())
-                .format(Date(post.published))
+                .format(Date((post.published * 1000))) //post.published нужно умножить на 1000, так как Date() ожидает время в миллисекундах.
             content.text = post.content
             content.movementMethod = ScrollingMovementMethod()
             likesIcon.isChecked = post.likedByMe
@@ -79,8 +79,8 @@ class PostViewHolder(
             val urlAvatar = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
             avatar.loadCircle(urlAvatar)
 
-            if (post.attachment != null) {
-                post.attachment.url?.let {
+            if (post.attachment?.url != null) {
+                post.attachment.url.let {
                     val url = "http://10.0.2.2:9999/images/${it}"
                     attachmentImage.load(url)
                 }
