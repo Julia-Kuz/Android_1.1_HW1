@@ -15,7 +15,8 @@ data class Post(
     val videoLink: String? = null,
     val saved: Boolean = false,
     val authorAvatar: String = "",
-    val attachment: Attachment? = null
+    val attachment: Attachment? = null,
+    val hidden: Boolean
 ) {
     fun attachmentFromDTO (): AttachmentEntity? {
         return attachment?.let { AttachmentEntity (attachment.url, attachment.description, it.type) }
@@ -27,6 +28,3 @@ data class Attachment(
     val description: String? = null,
     val type: AttachmentType
 )
-
-
-

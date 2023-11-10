@@ -5,6 +5,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import okhttp3.Call
 //import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -24,12 +32,15 @@ import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 
 class PostRepositoryImpl (private val dao: PostDao) : PostRepository {
 
-    override val data = dao.getAll().map(List<PostEntity>::toDto) //map PostEntity into Posts
+    override val data = dao.getAll()
+        .map(List<PostEntity>::toDto) //map PostEntity into Posts //после изменения на flow - import kotlinx.coroutines.flow.map
+       // .flowOn(Dispatchers.Default) //можно опустить, поскольку во viewmodel укажем контекст, на каком потоке работать
 
     override suspend fun getAll() {
         try {
@@ -51,6 +62,33 @@ class PostRepositoryImpl (private val dao: PostDao) : PostRepository {
         } catch (e: Exception) {
             throw UnknownError
         }
+    }
+
+    override fun getNewerCount(id: Long): Flow<Int> = flow {//импорт из пакета корутин
+        while (true) { // м.сделать бесконечный цикл, т.к.по switchMap (вьюмодель) неактуальные flow будут отменяться
+            delay(10_000L)
+            val response = PostsApi.retrofitService.getNewer(id)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            val newBody = body.map {
+                it.copy(saved = true, hidden = true)
+            }
+            dao.insert(newBody.toEntity())
+            emit(body.size)
+        }
+    }
+        .catch {e -> e.printStackTrace() } // e -> throw AppError.from(e) - роняет приложение
+        .flowOn(Dispatchers.Default)
+
+    override suspend fun updatePosts() {
+        val newPosts = dao.getNewPosts()
+        val updatedPosts = newPosts.map {
+            it.copy(hidden = false)
+        }
+        dao.insert(updatedPosts)
     }
 
     override suspend fun save(post: Post) {

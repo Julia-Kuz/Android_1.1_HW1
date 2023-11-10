@@ -27,6 +27,8 @@
     <string name="error_loading">Ошибка загрузки</string>
     <string name="retry_loading">Перезагрузить</string>
     <string name="no_posts">Нет постов</string>
+    <string name="update_posts_button">Кнопка обновить посты</string>
+    <string name="new_posts">Свежие посты</string>
 
 
 </resources>

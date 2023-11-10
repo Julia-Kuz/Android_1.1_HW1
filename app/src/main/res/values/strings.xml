@@ -27,5 +27,7 @@
     <string name="error_loading">Error loading</string>
     <string name="retry_loading">Retry loading</string>
     <string name="no_posts">No posts</string>
+    <string name="update_posts_button">update Posts Button</string>
+    <string name="new_posts">New Posts</string>
 
 </resources>
