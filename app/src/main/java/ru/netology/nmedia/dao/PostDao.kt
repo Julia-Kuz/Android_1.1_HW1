@@ -3,7 +3,9 @@ package ru.netology.nmedia.dao
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import ru.netology.nmedia.entity.PostEntity
 
 @Dao
@@ -11,14 +13,30 @@ interface PostDao {
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     fun getAll(): LiveData<List<PostEntity>>
 
-    @Insert
-    fun insert(post: PostEntity)
+//    @Query("SELECT COUNT(*) == 0 FROM PostEntity")
+//    suspend fun isEmpty(): Boolean
 
-    @Query("UPDATE PostEntity SET content = :content WHERE id = :id")
-    fun updateContentById(id: Long, content: String)
+    @Insert (onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(post: PostEntity)
 
-    fun save(post: PostEntity) =
-        if (post.id == 0L) insert(post) else post.content?.let { updateContentById(post.id, it) }
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(posts: List<PostEntity>)
+
+
+    @Query("DELETE FROM PostEntity WHERE saved = 0 AND content = :content")
+    suspend fun removePost(content: String)
+
+    @Transaction
+    suspend fun updatePost (post: PostEntity) {
+        post.content?.let { removePost(it) }
+        insert(post.copy(saved = true))
+    }
+
+//    @Query("UPDATE PostEntity SET content = :content WHERE id = :id")
+//    suspend fun updateContentById(id: Long, content: String)
+
+//    suspend fun save (post: PostEntity) =
+//        if (post.id == 0L) insert(post) else post.content?.let { updateContentById(post.id, it) }
 
     @Query("""
         UPDATE PostEntity SET
@@ -26,10 +44,10 @@ interface PostDao {
         likedByMe = CASE WHEN likedByMe THEN 0 ELSE 1 END
         WHERE id = :id
         """)
-    fun likeById(id: Long)
+    suspend fun likeById(id: Long)
 
     @Query("DELETE FROM PostEntity WHERE id = :id")
-    fun removeById(id: Long)
+    suspend fun removeById(id: Long)
 
     @Query("UPDATE PostEntity SET share = share + 1 WHERE id = :id")
     fun shareById(id: Long)

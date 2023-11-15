@@ -88,23 +88,30 @@ class MainFragment : Fragment() {
             override fun addLink(id: Long, link: String) {
                 viewModel.addLink(id, link)
             }
+
+            override fun retryPost(content: String) {
+                viewModel.changeContentAndSave(content)
+            }
         }
         )
 
         binding.recyclerList.adapter = adapter  // получаю доступ к RecyclerView
 
-        viewModel.data.observe(viewLifecycleOwner) { state ->
+        viewModel.data.observe(viewLifecycleOwner) { feedModel ->
             val newPost =
-                state.posts.size > adapter.currentList.size //проверяем, что это добавление поста, а не др действие (лайк и т.п.)
+                feedModel.posts.size > adapter.currentList.size //проверяем, что это добавление поста, а не др действие (лайк и т.п.)
 
-            adapter.submitList(state.posts) {
+            adapter.submitList(feedModel.posts) {
                 if (newPost) {
                     binding.recyclerList.smoothScrollToPosition(0)
                 } // scroll к верхнему сообщению только при добавлении
             }
-            binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error
-            binding.emptyText.isVisible = state.empty
+            binding.emptyText.isVisible = feedModel.empty
+        }
+
+        viewModel.dataState.observe(viewLifecycleOwner) { feedModelState ->
+            binding.progress.isVisible = feedModelState.loading
+            binding.errorGroup.isVisible = feedModelState.error
         }
 
         binding.retryButton.setOnClickListener {
@@ -112,7 +119,8 @@ class MainFragment : Fragment() {
         }
 
         binding.swiperefresh.setOnRefreshListener {
-            viewModel.loadPosts()
+            viewModel.refreshPosts()
+            //viewModel.loadPosts()
             binding.swiperefresh.isRefreshing = false
         }
 

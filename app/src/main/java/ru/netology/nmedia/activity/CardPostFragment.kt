@@ -1,6 +1,8 @@
 package ru.netology.nmedia.activity
 
+import android.content.Context
 import android.content.Intent
+import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
@@ -17,8 +19,12 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.load
 import ru.netology.nmedia.loadCircle
 import ru.netology.nmedia.numberRepresentation
+import ru.netology.nmedia.util.AndroidUtils
+import ru.netology.nmedia.util.Constants
 import ru.netology.nmedia.util.PostDealtWith
 import ru.netology.nmedia.viewModel.PostViewModel
+import java.util.Date
+import java.util.Locale
 
 class CardPostFragment : Fragment() {
 
@@ -45,7 +51,8 @@ class CardPostFragment : Fragment() {
             with(binding) {
 
                 author.text = post.author
-                published.text = post.published
+                published.text = SimpleDateFormat("dd MMM yyyy в HH:mm", Locale.getDefault()).format(Date((post.published * 1000)))
+                //post.published нужно умножить на 1000, так как Date() ожидает время в миллисекундах.
                 content.text = post.content
                 likesIcon.isChecked = post.likedByMe
                 likesIcon.text = numberRepresentation(post.likes)
@@ -57,13 +64,17 @@ class CardPostFragment : Fragment() {
                     groupPlay.visibility = View.VISIBLE
                 } else groupPlay.visibility = View.GONE
 
+                if (post.saved) {
+                    serverGroup.visibility = View.GONE
+                } else serverGroup.visibility = View.VISIBLE
+
                 //**** ДЗ Glide
 
                 val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
                 avatar.loadCircle(url)
 
-                if (post.attachment != null) {
-                    post.attachment.url?.let {
+                if (post.attachment?.url != null) {
+                    post.attachment.url.let {
                         val url = "http://10.0.2.2:9999/images/${it}"
                         attachmentImage.load (url)
                     }
@@ -139,13 +150,17 @@ class CardPostFragment : Fragment() {
                         } else groupLink.visibility = View.GONE
                     }
                 }
+
+                binding.serverRetry.setOnClickListener {
+                    viewModel.changeContentAndSave(binding.content.text.toString())
+                }
             }
         }
 
         fill(post)
 
-        viewModel.data.observe(viewLifecycleOwner) {state ->
-            state.posts.find { it.id == post.id }?.let { fill(it.copy()) }
+        viewModel.data.observe(viewLifecycleOwner) {feedModel ->
+            feedModel.posts.find { it.id == post.id }?.let { fill(it.copy()) }
         }
 
         return binding.root

@@ -1,21 +1,32 @@
 package ru.netology.nmedia.dto
 
+import ru.netology.nmedia.entity.AttachmentEntity
+import ru.netology.nmedia.util.AttachmentType
+
 data class Post(
     val id: Long,
-    val author: String? = null,
-    val content: String? = null,
-    val published: String? = null,
+    val author: String,
+    val content: String,
+    val published: Long,
     val likes: Int = 0,
     val likedByMe: Boolean = false,
     val share: Int = 0,
     val views: Int = 0,
     val videoLink: String? = null,
-    val authorAvatar: String? = null,
+    val saved: Boolean = false,
+    val authorAvatar: String = "",
     val attachment: Attachment? = null
-)
+) {
+    fun attachmentFromDTO (): AttachmentEntity? {
+        return attachment?.let { AttachmentEntity (attachment.url, attachment.description, it.type) }
+    }
+}
 
 data class Attachment(
     val url: String? = null,
     val description: String? = null,
-    val type: String? = null
+    val type: AttachmentType
 )
+
+
+

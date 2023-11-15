@@ -3,6 +3,7 @@ package ru.netology.nmedia.api
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
@@ -16,21 +17,24 @@ import ru.netology.nmedia.dto.Post
 private const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/" // в build.gradle в buildTypes прописали в зависимости от сборки
 
 // 1. описываем интерфейс для доступа к нашему серверу, в котором перечисляем все методы
+// ! модели данных лучше отделять на разных слоях =>
+// в качестве модели данных для retrofit лучше не брать модель <Post>, нужно сделать как для Room - свой PostDao & PostEntity
+
 interface PostsApiService {
     @GET ("posts")
-    fun getAll () : Call <List <Post>>   // Call импортировать нужно из retrofit2
+    suspend fun getAll () : Response <List <Post>>   // импортировать нужно из retrofit2
 
     @POST("posts/{id}/likes")
-    fun likeById(@Path("id") id: Long): Call<Post>
+    suspend fun likeById(@Path("id") id: Long): Response <Post>
 
     @DELETE("posts/{id}/likes")
-    fun dislikeById(@Path("id") id: Long): Call<Post>
+    suspend fun dislikeById(@Path("id") id: Long): Response <Post>
 
     @POST("posts")
-    fun save(@Body post: Post): Call<Post>
+    suspend fun save(@Body post: Post): Response<Post>
 
     @DELETE("posts/{id}")
-    fun removeById(@Path("id") id: Long): Call<Unit>
+    suspend fun removeById(@Path("id") id: Long): Response <Unit>
 
 }
 

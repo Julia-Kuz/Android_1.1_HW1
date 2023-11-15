@@ -1,6 +1,8 @@
 package ru.netology.nmedia.repository
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.map
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.Call
@@ -17,178 +19,100 @@ import java.util.concurrent.TimeUnit
 import retrofit2.Callback
 import retrofit2.Response
 import ru.netology.nmedia.api.PostsApiService
+import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.entity.PostEntity
+import ru.netology.nmedia.entity.toDto
+import ru.netology.nmedia.entity.toEntity
+import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.error.NetworkError
+import ru.netology.nmedia.error.UnknownError
 
-class PostRepositoryImpl : PostRepository {
+class PostRepositoryImpl (private val dao: PostDao) : PostRepository {
 
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .build()
+    override val data = dao.getAll().map(List<PostEntity>::toDto) //map PostEntity into Posts
 
-    private val gson = Gson()
-
-    private val postsType = object : TypeToken<List<Post>>() {}.type //нужно для парсинга
-
-    companion object {
-        private const val BASE_URL = "http://10.0.2.2:9999/api/slow"
-        private val jsonType = "application/json".toMediaType()
-    }
-
-    override fun getAllAsync(callback: PostRepository.GetMyCallback <List<Post>>) {
-
-        PostsApi.retrofitService.getAll()  // создали запрос
-            //при импорте интерфейса Callback нужно теперь выбирать библиотеку Retrofit
-            .enqueue(object : Callback <List<Post>> {
-
-                override fun onFailure(call: retrofit2.Call<List<Post>>, t: Throwable) {
-                    callback.onError(Exception(t))
-                }
-
-                override fun onResponse(
-                    call: retrofit2.Call<List<Post>>,
-                    response: Response<List<Post>>
-                ) {
-                    if (response.isSuccessful) {
-                        callback.onSuccess(response.body() ?: throw RuntimeException ("empty"))
-                    } else {
-                        Log.d("Mylog", "error code: ${response.code()} with ${response.message()}")
-                        callback.onError(RuntimeException ("error code: ${response.code()} with ${response.message()}"))
-                    }
-                }
-            })
-    }
-
-    override fun likeByIdAsync(
-        id: Long,
-        flag: Boolean,
-        callback: PostRepository.GetMyCallback<Post>
-    ) {
-        val request: retrofit2.Call<Post> = if (!flag) {
-            PostsApi.retrofitService.likeById(id)
-        } else {
-            PostsApi.retrofitService.dislikeById(id)
-        }
-
-        request.enqueue(object : Callback <Post> {
-
-            override fun onFailure(call: retrofit2.Call<Post>, t: Throwable) {
-                callback.onError(Exception(t))
+    override suspend fun getAll() {
+        try {
+            val response = PostsApi.retrofitService.getAll() //получаем посты из сети
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
             }
 
-            override fun onResponse(call: retrofit2.Call<Post>, response: Response<Post>) {
-                if (response.isSuccessful) {
-                    callback.onSuccess(response.body() ?: throw RuntimeException ("error"))
+            val body = response.body() ?: throw ApiError(response.code(), response.message()) //тело ответа
+
+            val newBody = body.map {
+                it.copy(saved = true)
+            }
+
+            dao.insert(newBody.toEntity()) // записывает ответ в базу данных
+
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    override suspend fun save(post: Post) {
+
+        dao.insert(PostEntity.fromDto(post))
+
+        try {
+            val response = PostsApi.retrofitService.save(post)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            val result = response.body() ?: throw ApiError(response.code(), response.message())
+
+            dao.updatePost(PostEntity.fromDto(result))
+
+            //dao.insert(PostEntity.fromDto(result))
+
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    override suspend fun likeById(id: Long, flag: Boolean) {
+        dao.likeById(id)
+
+            try {
+                val response = if (!flag) {
+                    PostsApi.retrofitService.likeById(id)
                 } else {
-                    Log.d("Mylog", "error code: ${response.code()} with ${response.message()}")
-                    callback.onError(RuntimeException ("error code: ${response.code()} with ${response.message()}"))
+                    PostsApi.retrofitService.dislikeById(id)
                 }
+
+                if (!response.isSuccessful) {
+                    throw ApiError(response.code(), response.message())
+                }
+                val body = response.body() ?: throw ApiError(response.code(), response.message())
+//                dao.likeById(body.id)
+            } catch (e: IOException) {
+                throw NetworkError
+            } catch (e: Exception) {
+                throw UnknownError
             }
-        })
     }
 
-    override fun saveAsync(post: Post, callback: PostRepository.GetMyCallback <Post>) {
-        PostsApi.retrofitService.save(post)
-            .enqueue(object : Callback <Post> {
+    override suspend fun removeById(id: Long) {
+        dao.removeById(id)
+        try {
+            val response = PostsApi.retrofitService.removeById(id)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
 
-                override fun onFailure(call: retrofit2.Call<Post>, t: Throwable) {
-                    callback.onError(Exception(t))
-                }
-
-                override fun onResponse(call: retrofit2.Call<Post>, response: Response<Post>) {
-
-                    if (response.isSuccessful) {
-                        callback.onSuccess(response.body() ?: throw RuntimeException ("empty body"))
-                    } else {
-                        Log.d("Mylog", "error code: ${response.code()} with ${response.message()}")
-                        callback.onError(RuntimeException ("error code: ${response.code()} with ${response.message()}"))
-                    }
-                }
-            })
-    }
-
-    override fun removeByIdAsync(id: Long, callback: PostRepository.GetMyCallback<Unit>) {
-        PostsApi.retrofitService.removeById(id)
-            .enqueue(object : Callback <Unit> {
-
-                override fun onFailure(call: retrofit2.Call<Unit>, t: Throwable) {
-                    callback.onError(Exception(t))
-                }
-
-                override fun onResponse(call: retrofit2.Call<Unit>, response: Response<Unit>) {
-                    if (response.isSuccessful) {
-                        callback.onSuccess(Unit)
-                    } else {
-                        Log.d("Mylog", "error code: ${response.code()} with ${response.message()}")
-                        callback.onError(RuntimeException ("error code: ${response.code()} with ${response.message()}"))
-                    }
-                }
-            })
-    }
-
-
-    //**************
-
-    override fun getAll(): List<Post> {
-        val request = Request.Builder()
-            .url("${BASE_URL}/posts")
-            .build()      // создали запрос
-
-        val call = client.newCall(request) // создали сетевой вызов
-        val response = call.execute() //вызов запустили, получили ответ
-        val responseString = response.body?.string() ?: error("Body is null") //ответ в виде строки
-        return gson.fromJson(
-            responseString,
-            postsType
-        ) // ответ парсим к нужному типу с помощью gson
-    }
-
-    override fun likeById(id: Long, flag: Boolean) : Post {
-        if (!flag) {
-            val request = Request.Builder()
-                .url("${BASE_URL}/posts/${id}/likes")
-                .post(gson.toJson("${BASE_URL}/posts/${id}/likes").toRequestBody(jsonType))
-                .build()
-
-            return client.newCall(request)
-                .execute()
-                .let { it.body?.string() }
-                .let {
-                    gson.fromJson(it, Post::class.java)
-                }
-        } else {
-            val request = Request.Builder()
-                .url("${BASE_URL}/posts/${id}/likes")
-                .delete(gson.toJson("${BASE_URL}/posts/${id}/likes").toRequestBody(jsonType))
-                .build()
-
-            return client.newCall(request)
-                .execute()
-                .let { it.body?.string() }
-                .let {
-                    gson.fromJson(it, Post::class.java)
-                }
+            response.body() ?: throw ApiError(response.code(), response.message())
+//            dao.removeById(id)
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
         }
-    }
-
-    override fun removeById(id: Long) {
-        val request: Request = Request.Builder()
-            .url("${BASE_URL}/posts/$id")
-            .delete()
-            .build()
-
-        client.newCall(request)
-            .execute()
-            .close()
-    }
-
-    override fun save(post: Post) {
-        val request: Request = Request.Builder()
-            .post(gson.toJson(post).toRequestBody(jsonType))
-            .url("${BASE_URL}/posts")
-            .build()
-
-        client.newCall(request)
-            .execute()
-            .close()
     }
 
     override fun shareById(id: Long) {
@@ -200,6 +124,26 @@ class PostRepositoryImpl : PostRepository {
     }
 
     override fun addLink(id: Long, link: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getAllAsync(callback: PostRepository.GetMyCallback<List<Post>>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun likeByIdAsync(
+        id: Long,
+        flag: Boolean,
+        callback: PostRepository.GetMyCallback<Post>
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun removeByIdAsync(id: Long, callback: PostRepository.GetMyCallback<Unit>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun saveAsync(post: Post, callback: PostRepository.GetMyCallback<Post>) {
         TODO("Not yet implemented")
     }
 }

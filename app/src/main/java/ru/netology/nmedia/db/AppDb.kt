@@ -9,6 +9,7 @@ import ru.netology.nmedia.entity.PostEntity
 
 @Database(entities = [PostEntity::class], version = 1)
 //если несколько таблиц в БД, то передаем через запятую: @Database(entities = [PostEntity::class, Table2::class, и т.д.], version = 1)
+
 abstract class AppDb : RoomDatabase() {
     abstract fun postDao(): PostDao          //используем в Viewmodel: private val repository: PostRepository = PostRepositoryRoomImpl(AppDb.getInstance(context = application).postDao())
 
@@ -25,7 +26,7 @@ abstract class AppDb : RoomDatabase() {
         private fun buildDatabase(context: Context) =
             Room.databaseBuilder(context, AppDb::class.java, "app.db")
                 .fallbackToDestructiveMigration()
-                .allowMainThreadQueries()
+                //.allowMainThreadQueries() //с корутинами не нужно
                 .build()
     }
 }

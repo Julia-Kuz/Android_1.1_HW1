@@ -1,5 +1,6 @@
 package ru.netology.nmedia.adapter
 
+import android.icu.text.SimpleDateFormat
 import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,8 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.load
 import ru.netology.nmedia.loadCircle
 import ru.netology.nmedia.numberRepresentation
+import java.util.Date
+import java.util.Locale
 
 interface OnInteractionListener {
     fun like(post: Post)
@@ -24,6 +27,7 @@ interface OnInteractionListener {
     fun play(post: Post)
     fun showPost(post: Post)
     fun addLink(id: Long, link: String)
+    fun retryPost (content: String)
 }
 
 class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
@@ -48,7 +52,8 @@ class PostViewHolder(
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
-            published.text = post.published
+            published.text = SimpleDateFormat("dd MMM yyyy в HH:mm", Locale.getDefault())
+                .format(Date((post.published * 1000))) //post.published нужно умножить на 1000, так как Date() ожидает время в миллисекундах.
             content.text = post.content
             content.movementMethod = ScrollingMovementMethod()
             likesIcon.isChecked = post.likedByMe
@@ -61,13 +66,21 @@ class PostViewHolder(
                 groupPlay.visibility = View.VISIBLE
             } else groupPlay.visibility = View.GONE
 
+            if (post.saved) {
+                serverGroup.visibility = View.GONE
+            } else serverGroup.visibility = View.VISIBLE
+
+            binding.serverRetry.setOnClickListener {
+                onInteractionListener.retryPost(binding.content.text.toString())
+            }
+
             //**** ДЗ Glide
 
-            val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
-            avatar.loadCircle(url)
+            val urlAvatar = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+            avatar.loadCircle(urlAvatar)
 
-            if (post.attachment != null) {
-                post.attachment.url?.let {
+            if (post.attachment?.url != null) {
+                post.attachment.url.let {
                     val url = "http://10.0.2.2:9999/images/${it}"
                     attachmentImage.load(url)
                 }
