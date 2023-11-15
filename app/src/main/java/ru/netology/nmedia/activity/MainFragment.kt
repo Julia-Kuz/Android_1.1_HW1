@@ -17,7 +17,6 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentMainBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.util.Constants
 import ru.netology.nmedia.util.PostDealtWith
 import ru.netology.nmedia.viewModel.PostViewModel
@@ -86,6 +85,10 @@ class MainFragment : Fragment() {
                 findNavController().navigate(R.id.action_mainFragment_to_cardPostFragment)
             }
 
+            override fun showPhoto(post: Post) {
+                PostDealtWith.savePostDealtWith(post)
+                findNavController().navigate(R.id.action_mainFragment_to_photoFragment2)
+            }
             override fun addLink(id: Long, link: String) {
                 viewModel.addLink(id, link)
             }
@@ -101,16 +104,23 @@ class MainFragment : Fragment() {
         binding.recyclerList.adapter = adapter  // получаю доступ к RecyclerView
 
         viewModel.data.observe(viewLifecycleOwner) { feedModel ->
-            val newPost =
-                feedModel.posts.size > adapter.currentList.size //проверяем, что это добавление поста, а не др действие (лайк и т.п.)
+
+//            val newPost =
+//                feedModel.posts.size > adapter.currentList.size //проверяем, что это добавление поста, а не др действие (лайк и т.п.)
+//            adapter.submitList(feedModel.posts) {
+//                if (newPost) {
+//                    binding.recyclerList.smoothScrollToPosition(0)
+//                } // scroll к верхнему сообщению только при добавлении
+//            }
 
             val visiblePosts = feedModel.posts.filter { !it.hidden }
+            val difference = visiblePosts.size > adapter.currentList.size
 
-//            adapter.submitList(feedModel.posts) {
             adapter.submitList(visiblePosts) {
-                if (newPost) {
+                if (difference) {
                     binding.recyclerList.smoothScrollToPosition(0)
-                } // scroll к верхнему сообщению только при добавлении
+                    binding.newPosts.visibility = View.GONE
+                }
             }
             binding.emptyText.isVisible = feedModel.empty
         }
@@ -128,6 +138,7 @@ class MainFragment : Fragment() {
         binding.newPosts.setOnClickListener {
             viewModel.updatePosts()
             binding.newPosts.visibility = View.GONE
+            binding.recyclerList.smoothScrollToPosition(0)
             count = 0
         }
 

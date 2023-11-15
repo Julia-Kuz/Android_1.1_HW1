@@ -26,6 +26,7 @@ interface OnInteractionListener {
     fun edit(post: Post)
     fun play(post: Post)
     fun showPost(post: Post)
+    fun showPhoto (post: Post)
     fun addLink(id: Long, link: String)
     fun retryPost (content: String)
 }
@@ -79,9 +80,9 @@ class PostViewHolder(
             val urlAvatar = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
             avatar.loadCircle(urlAvatar)
 
-            if (post.attachment?.url != null) {
+            if (post.attachment != null) {
                 post.attachment.url.let {
-                    val url = "http://10.0.2.2:9999/images/${it}"
+                    val url = "http://10.0.2.2:9999/media/${it}"
                     attachmentImage.load(url)
                 }
                 attachmentImage.visibility = View.VISIBLE
@@ -90,6 +91,12 @@ class PostViewHolder(
             }
 
             //****
+
+            attachmentImage.setOnClickListener {
+                post.attachment?.let { it1 ->
+                    onInteractionListener.showPhoto(post)
+                }
+            }
 
             likesIcon.setOnClickListener {
                 onInteractionListener.like(post)

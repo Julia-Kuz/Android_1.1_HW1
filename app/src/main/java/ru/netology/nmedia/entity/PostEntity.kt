@@ -1,5 +1,6 @@
 package ru.netology.nmedia.entity
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import ru.netology.nmedia.dto.Attachment
@@ -20,38 +21,39 @@ data class PostEntity(
     val videoLink: String?,
     val saved: Boolean,
     val authorAvatar: String,
-    val attachmentUrl: String?,
-    val attachmentDescription: String?,
-    val attachmentType: AttachmentType,
-    val hidden: Boolean
+    val hidden: Boolean,
+
+    @Embedded (prefix = "attachment_")
+    val attachment: AttachmentEmbeddable?
+//@Embedded (prefix = "attachment_") @Embedded аннотация используется для включения поля attachment прямо в таблицу PostEntity.
+// prefix аргумент в аннотации @Embedded используется для предотвращения конфликтов имен столбцов в базе данных, добавляя префикс к каждому имени столбца встроенного класса.
 
 ) {
-    fun toDto() = Post(id, author, content, published, likes, likedByMe, share, views, videoLink, saved, authorAvatar, attachmentToDto(), hidden)
+    fun toDto() = Post(id, author, content, published, likes, likedByMe, share, views, videoLink, saved, authorAvatar, hidden, attachment?.toDto())
 
-    private fun attachmentToDto () : Attachment {
-        return Attachment(attachmentUrl, attachmentDescription, attachmentType)
-    }
 
     companion object {
         fun fromDto(dto: Post) : PostEntity {
-            val attachmentDto = dto.attachmentFromDTO()
-            return if (attachmentDto != null) {
-                PostEntity(dto.id, dto.author, dto.content, dto.published, dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink, dto.saved, dto.authorAvatar,
-                    attachmentDto.url, attachmentDto.description, attachmentDto.type, dto.hidden)
-            } else {
-                PostEntity(dto.id, dto.author, dto.content, dto.published, dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink, dto.saved, dto.authorAvatar,
-                    attachmentUrl = null, attachmentDescription = null, attachmentType = AttachmentType.NONE, dto.hidden)
-            }
+            return PostEntity(dto.id, dto.author, dto.content, dto.published, dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink,
+                dto.saved, dto.authorAvatar, dto.hidden, AttachmentEmbeddable.fromDto(dto.attachment))
         }
-
     }
 }
 
-data class AttachmentEntity(
-    val url: String? = null,
-    val description: String? = null,
-    val type: AttachmentType
-)
+
+data class AttachmentEmbeddable(
+    val url: String,
+    val description: String?,
+    val type: AttachmentType,
+) {
+    fun toDto() = Attachment(url, description, type)
+
+    companion object {
+        fun fromDto(dto: Attachment?) = dto?.let {
+            AttachmentEmbeddable(it.url, it.description, it.type)
+        }
+    }
+}
 
 
 fun List<PostEntity>.toDto(): List<Post> = map(PostEntity::toDto)

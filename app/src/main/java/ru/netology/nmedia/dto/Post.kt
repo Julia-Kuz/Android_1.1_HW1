@@ -1,6 +1,5 @@
 package ru.netology.nmedia.dto
 
-import ru.netology.nmedia.entity.AttachmentEntity
 import ru.netology.nmedia.util.AttachmentType
 
 data class Post(
@@ -15,16 +14,12 @@ data class Post(
     val videoLink: String? = null,
     val saved: Boolean = false,
     val authorAvatar: String = "",
-    val attachment: Attachment? = null,
-    val hidden: Boolean
-) {
-    fun attachmentFromDTO (): AttachmentEntity? {
-        return attachment?.let { AttachmentEntity (attachment.url, attachment.description, it.type) }
-    }
-}
+    val hidden: Boolean,
+    val attachment: Attachment? = null
+)
 
 data class Attachment(
-    val url: String? = null,
+    val url: String = "",
     val description: String? = null,
     val type: AttachmentType
 )
