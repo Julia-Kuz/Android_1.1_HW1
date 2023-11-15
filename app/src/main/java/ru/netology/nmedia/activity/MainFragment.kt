@@ -17,6 +17,7 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentMainBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.util.Constants
 import ru.netology.nmedia.util.PostDealtWith
 import ru.netology.nmedia.viewModel.PostViewModel
@@ -95,18 +96,39 @@ class MainFragment : Fragment() {
         }
         )
 
+        binding.newPosts.visibility = View.GONE
+
         binding.recyclerList.adapter = adapter  // получаю доступ к RecyclerView
 
         viewModel.data.observe(viewLifecycleOwner) { feedModel ->
             val newPost =
                 feedModel.posts.size > adapter.currentList.size //проверяем, что это добавление поста, а не др действие (лайк и т.п.)
 
-            adapter.submitList(feedModel.posts) {
+            val visiblePosts = feedModel.posts.filter { !it.hidden }
+
+//            adapter.submitList(feedModel.posts) {
+            adapter.submitList(visiblePosts) {
                 if (newPost) {
                     binding.recyclerList.smoothScrollToPosition(0)
                 } // scroll к верхнему сообщению только при добавлении
             }
             binding.emptyText.isVisible = feedModel.empty
+        }
+
+        var count = 0
+        viewModel.newerCount.observe(viewLifecycleOwner) {
+            if (it != 0) {
+                count++
+                if (count > 1) {binding.newPosts.text = "$count New Posts"}
+                else {binding.newPosts.text = "$count New Post"}
+                binding.newPosts.visibility = View.VISIBLE
+            }
+        }
+
+        binding.newPosts.setOnClickListener {
+            viewModel.updatePosts()
+            binding.newPosts.visibility = View.GONE
+            count = 0
         }
 
         viewModel.dataState.observe(viewLifecycleOwner) { feedModelState ->

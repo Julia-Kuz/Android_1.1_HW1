@@ -1,20 +1,18 @@
 package ru.netology.nmedia.dao
 
-import androidx.lifecycle.LiveData
+import androidx.compose.animation.core.updateTransition
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import kotlinx.coroutines.flow.Flow
 import ru.netology.nmedia.entity.PostEntity
 
 @Dao
 interface PostDao {
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
-    fun getAll(): LiveData<List<PostEntity>>
-
-//    @Query("SELECT COUNT(*) == 0 FROM PostEntity")
-//    suspend fun isEmpty(): Boolean
+    fun getAll(): Flow<List<PostEntity>>  // Правильный импорт д.б. - kotlinx.coroutines.flow.Flow !!!
 
     @Insert (onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)
@@ -22,21 +20,17 @@ interface PostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(posts: List<PostEntity>)
 
+    @Query("SELECT * FROM PostEntity WHERE hidden = 1")
+    suspend fun getNewPosts (): List<PostEntity>
 
     @Query("DELETE FROM PostEntity WHERE saved = 0 AND content = :content")
     suspend fun removePost(content: String)
 
     @Transaction
     suspend fun updatePost (post: PostEntity) {
-        post.content?.let { removePost(it) }
+        removePost(post.content)
         insert(post.copy(saved = true))
     }
-
-//    @Query("UPDATE PostEntity SET content = :content WHERE id = :id")
-//    suspend fun updateContentById(id: Long, content: String)
-
-//    suspend fun save (post: PostEntity) =
-//        if (post.id == 0L) insert(post) else post.content?.let { updateContentById(post.id, it) }
 
     @Query("""
         UPDATE PostEntity SET
@@ -57,4 +51,15 @@ interface PostDao {
 
     @Query("UPDATE PostEntity SET videoLink = :link WHERE id = :id")
     fun addLink(id: Long, link: String)
+
+
+//    @Query("SELECT COUNT(*) == 0 FROM PostEntity")
+//    suspend fun isEmpty(): Boolean
+
+//    @Query("UPDATE PostEntity SET content = :content WHERE id = :id")
+//    suspend fun updateContentById(id: Long, content: String)
+
+//    suspend fun save (post: PostEntity) =
+//        if (post.id == 0L) insert(post) else post.content?.let { updateContentById(post.id, it) }
+
 }

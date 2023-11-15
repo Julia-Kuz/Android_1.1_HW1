@@ -95,4 +95,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+<!--
+    <Button
+        android:id="@+id/newPosts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Posts"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"/>
+        -->
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/newPosts"
+        style="@style/Widget.AppTheme.UpdatePostsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/update_posts_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        app:icon="@drawable/ic_arrow_upward_24"
+        android:visibility="visible" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

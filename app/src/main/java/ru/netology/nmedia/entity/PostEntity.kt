@@ -22,10 +22,11 @@ data class PostEntity(
     val authorAvatar: String,
     val attachmentUrl: String?,
     val attachmentDescription: String?,
-    val attachmentType: AttachmentType
+    val attachmentType: AttachmentType,
+    val hidden: Boolean
 
 ) {
-    fun toDto() = Post(id, author, content, published, likes, likedByMe, share, views, videoLink, saved, authorAvatar, attachmentToDto())
+    fun toDto() = Post(id, author, content, published, likes, likedByMe, share, views, videoLink, saved, authorAvatar, attachmentToDto(), hidden)
 
     private fun attachmentToDto () : Attachment {
         return Attachment(attachmentUrl, attachmentDescription, attachmentType)
@@ -36,10 +37,10 @@ data class PostEntity(
             val attachmentDto = dto.attachmentFromDTO()
             return if (attachmentDto != null) {
                 PostEntity(dto.id, dto.author, dto.content, dto.published, dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink, dto.saved, dto.authorAvatar,
-                    attachmentDto.url, attachmentDto.description, attachmentDto.type)
+                    attachmentDto.url, attachmentDto.description, attachmentDto.type, dto.hidden)
             } else {
                 PostEntity(dto.id, dto.author, dto.content, dto.published, dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink, dto.saved, dto.authorAvatar,
-                    attachmentUrl = null, attachmentDescription = null, attachmentType = AttachmentType.NONE)
+                    attachmentUrl = null, attachmentDescription = null, attachmentType = AttachmentType.NONE, dto.hidden)
             }
         }
 

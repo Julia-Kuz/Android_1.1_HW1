@@ -26,6 +26,14 @@
 
     </style>
 
+    <style name="Widget.AppTheme.UpdatePostsButton" parent="Widget.Material3.Button.TextButton.Icon">
+        <item name="android:textColor">@color/white</item>
+        <item name="iconTint">@color/white</item>
+        <item name="android:checkable">true</item>
+        <item name="backgroundTint">@color/light_green</item>
+
+    </style>
+
     <!-- Стиль для фрагмента Error Slide -->
     <style name="AppBottomSheetDialogTheme"
         parent="Theme.Design.Light.BottomSheetDialog">
