@@ -9,7 +9,8 @@
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerList"
@@ -25,13 +26,28 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+    <!--include layout="@layout/toolbar" /-->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarMain"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/light_green"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="First App"
+        app:titleTextColor="@color/white" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addPost"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
         android:backgroundTint="@color/light_green"
+        android:clickable="true"
         android:contentDescription="@string/add_post"
+        android:focusable="true"
+        android:tintMode="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_add_24dp">
@@ -42,8 +58,7 @@
         android:id="@+id/errorGreyScreen"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/grey"
-        />
+        android:background="@color/grey" />
 
     <TextView
         android:id="@+id/retryText"
@@ -95,30 +110,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-<!--
-    <Button
-        android:id="@+id/newPosts"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Posts"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="8dp"
-        android:visibility="gone"/>
-        -->
+    <!--
+        <Button
+            android:id="@+id/newPosts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Posts"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"/>
+            -->
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/newPosts"
         style="@style/Widget.AppTheme.UpdatePostsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:contentDescription="@string/update_posts_button"
+        android:visibility="visible"
+        app:icon="@drawable/ic_arrow_upward_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="8dp"
-        app:icon="@drawable/ic_arrow_upward_24"
-        android:visibility="visible" />
+        app:layout_constraintTop_toTopOf="@id/swiperefresh" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

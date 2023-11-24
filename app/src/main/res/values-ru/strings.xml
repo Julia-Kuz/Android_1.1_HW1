@@ -32,5 +32,16 @@
     <string name="description_select_photo">Выбрать фото</string>
     <string name="description_take_photo">Сделать фото</string>
     <string name="description_photo">Фотография</string>
+    <string name="sign_in">Войти</string>
+    <string name="sign_up">Зарегистрироваться</string>
+    <string name="sign_out">Выйти</string>
+    <string name="menu_authorization">Меню авторизации</string>
+    <string name="Login">Ваш логин</string>
+    <string name="password">Пароль</string>
+    <string name="sign_in_to_proceed">Войдите, чтобы продолжить</string>
+    <string name="no_thank_you">Нет, спасибо</string>
+    <string name="confirm_your_password">Подтвердите свой пароль</string>
+    <string name="your_name">Ваше имя</string>
+    <string name="remove_photo">Удалить фото</string>
 
 </resources>

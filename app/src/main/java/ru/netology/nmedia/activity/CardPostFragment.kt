@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -117,6 +118,8 @@ class CardPostFragment : Fragment() {
                 viewIcon.setOnClickListener {
                     viewModel.viewById(post.id)
                 }
+
+                menu.isVisible = post.ownedByMe //меню видимо только, если пост наш
 
                 menu.setOnClickListener {
 

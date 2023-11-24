@@ -12,6 +12,7 @@
 
         <item name="colorPrimary">@color/light_green</item>
 
+
     </style>
 
     <style name="Theme.First_App" parent="Base.Theme.First_App" />

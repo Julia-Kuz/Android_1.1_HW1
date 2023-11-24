@@ -11,8 +11,10 @@ import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
@@ -31,7 +33,8 @@ private val defaultPost = Post(
     likedByMe = false,
     published = 0L,
     videoLink = null,
-    hidden = true
+    hidden = true,
+    authorId = 0
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
@@ -39,13 +42,29 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: PostRepository =
         PostRepositoryImpl(AppDb.getInstance(context = application).postDao()) // !!! Лучше, чтобы это было внутри конструктора PostViewModel(application: Application, ...)
 
-    val data: LiveData<FeedModel> = repository.data
-        .map(::FeedModel)  //возвращает данные в виде flow , поэтому вызываем ф-цию расширения asLiveData
-        .catch { // обрабатывает исключения
-            it.printStackTrace()
-        }
-        .asLiveData(Dispatchers.Default) //сюда передаем контекст, на котором будет работать это преобразование: Dispatchers.Default (чтобы не с главного потока),
-                                         // поэтому в репозитории flowOn(Dispatchers.Default) можно опустить
+    //до авторизации
+//    val data: LiveData<FeedModel> = repository.data
+//        .map(::FeedModel)  //возвращает данные в виде flow , поэтому вызываем ф-цию расширения asLiveData
+//        .catch { // обрабатывает исключения
+//            it.printStackTrace()
+//        }
+//        .asLiveData(Dispatchers.Default) //сюда передаем контекст, на котором будет работать это преобразование: Dispatchers.Default (чтобы не с главного потока),
+//                                         // поэтому в репозитории flowOn(Dispatchers.Default) можно опустить
+
+
+    //для авторизации: меняем принцип формирования data - нужно flow из БД объединить с flow авторизации:
+
+    val data: LiveData<FeedModel> = AppAuth.getInstance()
+        .authStateFlow
+        .flatMapLatest { auth -> //эта лямбда вызывается каждый раз, как меняется значение авторизации authStateFlow
+            repository.data.map { posts ->
+                    FeedModel(
+                        posts.map { it.copy(ownedByMe = it.authorId == auth.id) }, //наш пост, если id текущего авторизованного пользователя равно id автора текущего поста
+                        posts.isEmpty()
+                    )
+                }
+        }.asLiveData(Dispatchers.Default)
+
 
     val newerCount: LiveData<Int> = data.switchMap { //т.е. это пересоздание LiveData (data) при каждом изменении исходной/списка постов/
         repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L) //передаем id самого последнего поста, который является id самого первого поста в списке постов
