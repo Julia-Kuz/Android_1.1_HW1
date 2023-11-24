@@ -29,5 +29,9 @@
     <string name="no_posts">No posts</string>
     <string name="update_posts_button">update Posts Button</string>
     <string name="new_posts">New Posts</string>
+    <string name="description_select_photo">Select photo</string>
+    <string name="description_take_photo">Take photo</string>
+    <string name="description_photo">Photo</string>
+
 
 </resources>

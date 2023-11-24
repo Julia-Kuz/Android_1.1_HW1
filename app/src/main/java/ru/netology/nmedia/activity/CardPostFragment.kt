@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
+import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.load
 import ru.netology.nmedia.loadCircle
@@ -73,9 +74,9 @@ class CardPostFragment : Fragment() {
                 val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
                 avatar.loadCircle(url)
 
-                if (post.attachment?.url != null) {
+                if (post.attachment != null) {
                     post.attachment.url.let {
-                        val url = "http://10.0.2.2:9999/images/${it}"
+                        val url = "http://10.0.2.2:9999/media/${it}"
                         attachmentImage.load (url)
                     }
                     attachmentImage.visibility = View.VISIBLE
@@ -84,6 +85,13 @@ class CardPostFragment : Fragment() {
                 }
 
                 //****
+
+                attachmentImage.setOnClickListener {
+                    post.attachment?.let {
+                        PostDealtWith.savePostDealtWith(post)
+                        findNavController().navigate(R.id.action_cardPostFragment_to_photoFragment2)
+                    }
+                }
 
 
                 likesIcon.setOnClickListener {

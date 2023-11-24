@@ -16,8 +16,10 @@ import kotlinx.coroutines.flow.onEach
 import okhttp3.Call
 //import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 //import okhttp3.Response
 import ru.netology.nmedia.api.PostsApi
@@ -28,6 +30,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import ru.netology.nmedia.api.PostsApiService
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dto.Attachment
+import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
@@ -35,6 +39,9 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
+import ru.netology.nmedia.model.PhotoModel
+import ru.netology.nmedia.util.AttachmentType
+import java.io.File
 
 class PostRepositoryImpl (private val dao: PostDao) : PostRepository {
 
@@ -112,6 +119,43 @@ class PostRepositoryImpl (private val dao: PostDao) : PostRepository {
         } catch (e: Exception) {
             throw UnknownError
         }
+    }
+
+    override suspend fun saveWithAttachment(post: Post, photoModel: PhotoModel) {
+        dao.insert(PostEntity.fromDto(post))
+
+        try {
+            val mediaResponse =saveMedia(photoModel.file)   //отправили изображение на сервер
+
+            if (!mediaResponse.isSuccessful) {
+                throw ApiError(mediaResponse.code(), mediaResponse.message())
+            }
+
+            val media = mediaResponse.body() ?: throw ApiError(mediaResponse.code(), mediaResponse.message()) //получили результат
+
+            val response = PostsApi.retrofitService.save(post.copy(attachment = Attachment(media.id, "", AttachmentType.IMAGE))) //добавили копию поста, записали в него attachment
+
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            val result = response.body() ?: throw ApiError(response.code(), response.message())   //получили ответ
+
+            dao.updatePost(PostEntity.fromDto(result))  //записываем в базу
+
+            //dao.insert(PostEntity.fromDto(result))
+
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    //функция по сохранению media на сервер
+    private suspend fun saveMedia (file: File): Response<Media> {
+        val part = MultipartBody.Part.createFormData("file", file.name, file.asRequestBody()) //file.asRequestBody() - данные, кот отправятся на сервер
+        return PostsApi.retrofitService.saveMedia (part)
     }
 
     override suspend fun likeById(id: Long, flag: Boolean) {

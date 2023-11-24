@@ -1,25 +1,28 @@
 package ru.netology.nmedia.activity
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.addCallback
-import androidx.compose.ui.graphics.Color
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.Toolbar
+import androidx.core.net.toFile
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.load.resource.bitmap.CenterInside
-import com.google.android.material.snackbar.Snackbar
+import com.github.dhaval2404.imagepicker.ImagePicker
+import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
-import ru.netology.nmedia.load
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.util.Constants
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewModel.PostViewModel
+
 
 class NewPostFragment : Fragment() {
     companion object {
@@ -29,6 +32,14 @@ class NewPostFragment : Fragment() {
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
     )
+
+    private val photoResultContract = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            val uri = it.data?.data ?: return@registerForActivityResult  //it.data?.data: data? - это интент, data - данные, т.е.uri, кот нас интересует
+            val file = uri.toFile() //uri конвертируем в файл
+            viewModel.setPhoto(uri, file)
+        }
+    } // этот контракт используем по клику на takephoto и pickPhoto
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,24 +52,83 @@ class NewPostFragment : Fragment() {
             false
         )
 
-        binding.addContent.requestFocus()
+        binding.edit.requestFocus()
 
         arguments?.textArg
-            ?.let(binding.addContent::setText)
+            ?.let(binding.edit::setText)
+        viewModel.clearPhoto()
 
-        binding.ok.setOnClickListener {
-            viewModel.changeContentAndSave(binding.addContent.text.toString())
-            // viewModel.draft = ""                        //  черновик с помощью VieModel
-            (activity as AppActivity).getSharedPreferences(
-                Constants.DRAFT_PREF_NAME,
-                Context.MODE_PRIVATE
-            ).edit().apply {
-                putString(Constants.DRAFT_KEY, "")
-                apply()
+// Пункт меню c моей темой приложения: (!) <style name="Base.Theme.First_App" parent="Theme.Material3.DayNight.NoActionBar">
+
+        val toolbar: Toolbar = binding.toolbar
+        toolbar.inflateMenu(R.menu.menu_new_post)
+
+        binding.toolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.saveNewPost -> {
+                    viewModel.changeContentAndSave(binding.edit.text.toString())
+                    AndroidUtils.hideKeyboard(requireView())
+                    true
+                }
+                else -> false
             }
-            AndroidUtils.hideKeyboard(requireView())
-            // findNavController().navigateUp()  //переносим в подписку на postCreated (Life Cycle Event)
         }
+
+
+// Добавляем пункт меню c темой приложения (лекция) <!--style name="Base.Theme.First_App" parent="Theme.MaterialComponents.DayNight.DarkActionBar"-->:
+//
+//        requireActivity().addMenuProvider(object : MenuProvider {
+//            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+//                menuInflater.inflate(R.menu.menu_new_post, menu)
+//            }
+//
+//            override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
+//                when (menuItem.itemId) {
+//                    R.id.saveNewPost -> {
+//                        viewModel.changeContentAndSave(binding.edit.text.toString())
+//                        AndroidUtils.hideKeyboard(requireView())
+//                        true
+//                    }
+//                    else -> false
+//                }
+//
+//        })
+
+
+        binding.takePhoto.setOnClickListener {
+            ImagePicker.Builder(this)
+                .crop()
+                .cameraOnly()
+                //.provider(ImageProvider.CAMERA)
+                .maxResultSize(2048, 2048)
+                //.compress(2048)
+                .createIntent { photoResultContract.launch(it) }
+                //.createIntent(photoResultContract::launch)
+        }
+
+        binding.pickPhoto.setOnClickListener {
+            ImagePicker.Builder(this)
+                .crop()
+                .galleryOnly()
+                .compress(2048)
+                .createIntent { photoResultContract.launch(it) }
+            //.createIntent(photoResultContract::launch)
+        }
+
+        viewModel.photo.observe(viewLifecycleOwner) {
+            if (it == null) {
+                binding.photoContainer.isGone = true
+                return@observe
+            }
+
+            binding.photoContainer.isVisible = true
+            binding.photoPreview.setImageURI(it.uri)
+        }
+
+        binding.removePhoto.setOnClickListener {
+            viewModel.clearPhoto()
+        }
+
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             // viewModel.draft = binding.addContent.text.toString()       // черновик с помощью VieModel
@@ -66,10 +136,10 @@ class NewPostFragment : Fragment() {
                 Constants.DRAFT_PREF_NAME,
                 Context.MODE_PRIVATE
             ).edit().apply {
-                putString(Constants.DRAFT_KEY, binding.addContent.text.toString())
+                putString(Constants.DRAFT_KEY, binding.edit.text.toString())
                 apply()
             }
-            // findNavController().navigateUp()
+            findNavController().navigateUp()
         }
 
         viewModel.postCreated.observe(viewLifecycleOwner) {
@@ -79,15 +149,15 @@ class NewPostFragment : Fragment() {
         viewModel.postCreatedError.observe(viewLifecycleOwner) {
 
             //вариант Snackbar
-            Snackbar.make(binding.ok, "", Snackbar.LENGTH_LONG)
-                .setAnchorView(binding.ok)
-                .setTextMaxLines(3)
-                .setText("Sorry :( \nSomething went wrong \nTry again")
-                .setBackgroundTint(android.graphics.Color.rgb(0, 102, 255))
-                .show()
+//            Snackbar.make(binding.ok, "", Snackbar.LENGTH_LONG)
+//                .setAnchorView(binding.edit)
+//                .setTextMaxLines(3)
+//                .setText("Sorry :( \nSomething went wrong \nTry again")
+//                .setBackgroundTint(android.graphics.Color.rgb(0, 102, 255))
+//                .show()
 
             //вариант BottomSheetDialogFragment
-//            ErrorSlideFragment().show(parentFragmentManager, "error")
+            ErrorSlideFragment().show(parentFragmentManager, "error")
 
             //вариант Toast
 //            val toast = Toast.makeText(context, "Sorry :( \nSomething went wrong", Toast.LENGTH_LONG)

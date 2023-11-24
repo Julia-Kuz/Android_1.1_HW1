@@ -7,5 +7,5 @@ object Constants {
 
 enum class AttachmentType {
     IMAGE,
-    NONE
+  //  NONE
 }
