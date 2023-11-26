@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -16,6 +17,7 @@ import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.AppActivity
+import ru.netology.nmedia.auth.AppAuth
 import kotlin.random.Random
 
 class FCMService : FirebaseMessagingService() {
@@ -45,6 +47,7 @@ class FCMService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
 
+        //*************** 1 задание  ******************
 //        message.data[action]?.let {  //обращаемя к классу message, св-во data по ключу action (в Idea putData("action", "LIKE"))
 //            when (Actions.valueOf(it)) {
 //                Actions.LIKE -> handleLike(gson.fromJson(message.data[content], InfoLike::class.java))  // ключ content (в Idea putData("content", """{...}"""))
@@ -63,10 +66,51 @@ class FCMService : FirebaseMessagingService() {
             }
         }
         println(Gson().toJson(message))
+
+                                              // ******************** задание An2 _ pushes ************** //
+
+       // val data = message.data[content]
+
+        val pushMessage = gson.fromJson(message.data[content], PushMessage::class.java)
+
+        when (pushMessage.recipientId) {
+            AppAuth.getInstance().authStateFlow.value.id -> handlePushMessage("все ок, id совпадают :)", pushMessage)
+            null -> handlePushMessage("Массовая рассылка", pushMessage)
+            0L -> AppAuth.getInstance().sendPushToken()
+            else -> AppAuth.getInstance().sendPushToken()
+        }
+
     }
 
+
     override fun onNewToken(token: String) {
-        println(token)
+        //println(token)
+        AppAuth.getInstance().sendPushToken(token)
+    }
+
+    private fun handlePushMessage(title: String, pushMessage: PushMessage) {
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(title)
+            .setContentText(pushMessage.content)
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText(pushMessage.content))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED          //проверяется есть ли разрешение на уведомление, если есть запускаем notify
+        ) {
+            NotificationManagerCompat.from(this).notify(
+                Random.nextInt(100_000),
+                notification
+            )
+        }
+
     }
 
 
@@ -158,3 +202,11 @@ data class PushPost(
 private fun enumContains(name: String): Boolean {
     return enumValues<Actions>().any { it.name == name }
 }
+
+data class PushMessage(
+    val recipientId: Long?,
+    val content: String,
+)
+
+
+

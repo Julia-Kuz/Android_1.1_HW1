@@ -1,15 +1,32 @@
 package ru.netology.nmedia.auth
 
 import android.content.Context
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.ktx.FirebaseMessagingKtxRegistrar
+import com.google.firebase.messaging.ktx.messaging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import ru.netology.nmedia.api.AuthApi
+import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
+import ru.netology.nmedia.workers.SendPushTokenWorker
 import java.io.File
 import java.io.IOException
 
@@ -21,7 +38,7 @@ import java.io.IOException
 
 //выполняет роль репозитория => создаю отдельную вьюмодель
 
-class AppAuth private constructor(context: Context) {
+class AppAuth private constructor(private val context: Context) {
     private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
     private val idKey = "id"
     private val tokenKey = "token"
@@ -51,6 +68,7 @@ class AppAuth private constructor(context: Context) {
 //        } else {
 //            _authStateFlow = MutableStateFlow(AuthState(id, token))
 //        }
+//        sendPushToken() // при наличии фонового worker эту строчку можно убрать из старта приложения
 //    }
 
 
@@ -62,6 +80,7 @@ class AppAuth private constructor(context: Context) {
             putString(tokenKey, token)
             apply() //or commit()
         }
+        sendPushToken()
     }
 
     @Synchronized
@@ -71,6 +90,7 @@ class AppAuth private constructor(context: Context) {
             clear()
             commit()
         }
+        sendPushToken()
     }
 
     suspend fun checkAuth(login: String, password: String): AuthState =
@@ -124,6 +144,37 @@ class AppAuth private constructor(context: Context) {
         } catch (e: Exception) {
             throw UnknownError
         }
+
+    fun sendPushToken(token: String? = null) {
+
+        val request = OneTimeWorkRequestBuilder<SendPushTokenWorker>()
+            .setConstraints(    // это то, при каких условиях worker должен быть запущен
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .setInputData(    //  задаем  входной параметр(ы)
+                Data.Builder()
+                    .putString(SendPushTokenWorker.TOKEN_KEY, token)
+                    .build()
+            )
+            .build()
+
+        WorkManager.getInstance(context)   //чтобы получить context в конструкторе сделали его свойством: class AppAuth private constructor(private val context: Context)
+                    .enqueueUniqueWork(SendPushTokenWorker.NAME_UNIQUE_WORK, ExistingWorkPolicy.REPLACE, request)   // далее планируем задачу
+
+
+        //  без фонового сервиса work manager
+//        CoroutineScope(Dispatchers.Default).launch {
+//            try {
+//                //val pushToken = PushToken(token ?: Firebase.messaging.token.await())
+//                val pushToken = PushToken(token ?: FirebaseMessaging.getInstance().token.await()) //лекция: либо токен уже готовый из вне, либо обращаемся к Firebase
+//                PostsApi.retrofitService.sendPushToken(pushToken)
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//        }
+    }
 
     //описываем инициализацию этого синглтона
     companion object {

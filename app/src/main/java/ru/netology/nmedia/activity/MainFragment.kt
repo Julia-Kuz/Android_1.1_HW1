@@ -2,6 +2,9 @@ package ru.netology.nmedia.activity
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.BlendMode
+import android.graphics.BlendModeColorFilter
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -121,9 +124,10 @@ class MainFragment : Fragment() {
 
         binding.newPosts.visibility = View.GONE
 
-        //реализация меню для авторизации с ToolBar
+        // *****************         реализация меню для авторизации с ToolBar   *****************
 
         val toolbar: Toolbar = binding.toolbarMain
+        toolbar.overflowIcon?.colorFilter = BlendModeColorFilter(Color.WHITE, BlendMode.SRC_ATOP) // чтобы три точки стали белыми - (!) Color д. использоваться из android.graphics, а не из androidx.compose.ui.graphics
 
         // с использованием Live data
 //        viewModelAuth.dataAuth.observe(viewLifecycleOwner) {
