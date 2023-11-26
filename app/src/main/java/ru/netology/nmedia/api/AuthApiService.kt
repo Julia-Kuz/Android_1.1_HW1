@@ -2,62 +2,51 @@ package ru.netology.nmedia.api
 
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
-import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
-import retrofit2.http.Path
 import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dto.Media
-import ru.netology.nmedia.dto.Post
+import java.io.File
+
 
 private const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/" // в build.gradle в buildTypes прописали в зависимости от сборки
 
 // 1. описываем интерфейс для доступа к нашему серверу, в котором перечисляем все методы
-// ! модели данных лучше отделять на разных слоях =>
-// в качестве модели данных для retrofit лучше не брать модель <Post>, нужно сделать как для Room - свой PostDao & PostEntity
 
-interface PostsApiService {
-    @GET ("posts")
-    suspend fun getAll () : Response <List <Post>>   // импортировать нужно из retrofit2
+interface AuthApiService {
 
-    @GET("posts/{id}/newer")
-    suspend fun getNewer(@Path("id") id: Long): Response<List<Post>>
+    @FormUrlEncoded
+    @POST("users/authentication")
+    suspend fun checkUser(@Field("login") login: String, @Field("pass") pass: String): Response<AuthState>
 
-    @POST("posts/{id}/likes")
-    suspend fun likeById(@Path("id") id: Long): Response <Post>
-
-    @DELETE("posts/{id}/likes")
-    suspend fun dislikeById(@Path("id") id: Long): Response <Post>
-
-    @POST("posts")
-    suspend fun save(@Body post: Post): Response<Post>
-
-    @DELETE("posts/{id}")
-    suspend fun removeById(@Path("id") id: Long): Response <Unit>
+    @FormUrlEncoded
+    @POST("users/registration")
+    suspend fun registerUser(@Field("login") login: String, @Field("pass") pass: String, @Field("name") name: String): Response<AuthState>
 
     @Multipart
-    @POST("media")
-    suspend fun saveMedia(@Part media: MultipartBody.Part): Response<Media>
-
-//    @FormUrlEncoded
-//    @POST("users/authentication")
-//    suspend fun checkUser(@Field("login") login: String, @Field("pass") pass: String): Response<AuthState>
+    @POST("users/registration")
+    suspend fun registerWithPhoto(
+        @Part("login") login: RequestBody,
+        @Part("pass") pass: RequestBody,
+        @Part("name") name: RequestBody,
+        @Part media: MultipartBody.Part,
+    ): Response<AuthState>
 
 }
 
 //Логирование
-val logger = HttpLoggingInterceptor().apply {
+val loggerAuth = HttpLoggingInterceptor().apply {
     //устанавливаем уровень логирования
     if (BuildConfig.DEBUG) {
         level = HttpLoggingInterceptor.Level.BODY
@@ -74,11 +63,11 @@ private val okhttp = OkHttpClient.Builder()
         }
         chain.proceed(chain.request())          //если token не было, продолжаем обработку с исходным запросом
     }
-    .addInterceptor(logger) //этот клиент передаем в retrofit - ставим после первого, чтобы заголовки "Authorization" уже выводились в logcat
+    .addInterceptor(loggerAuth) //этот клиент передаем в retrofit - ставим после первого, чтобы заголовки "Authorization" уже выводились в logcat
     .build()
 
 // 2. создаем переменную (клиент retrofit), которая знает BASE_URL и умеет парсить и формировать Gson
-val retrofit = Retrofit.Builder()
+val retrofitAuth = Retrofit.Builder()
     .baseUrl(BASE_URL)
     .client(okhttp)
     .addConverterFactory(GsonConverterFactory.create())
@@ -86,9 +75,9 @@ val retrofit = Retrofit.Builder()
 
 // 3. в финале создаем объект синглтон, у которого есть свойство retrofitService,
 //являющееся результатом создания на клиенте retrofit интерфейса PostsApiService
-object PostsApi {
+object AuthApi {
     val retrofitService by lazy {
-        retrofit.create(PostsApiService :: class.java)
+        retrofitAuth.create(AuthApiService :: class.java)
     }
 }
 

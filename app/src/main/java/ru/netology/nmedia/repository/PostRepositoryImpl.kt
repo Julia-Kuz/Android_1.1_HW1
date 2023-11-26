@@ -28,7 +28,6 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 import retrofit2.Callback
 import retrofit2.Response
-import ru.netology.nmedia.api.PostsApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Media
@@ -36,7 +35,6 @@ import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
-import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import ru.netology.nmedia.model.PhotoModel
@@ -196,6 +194,8 @@ class PostRepositoryImpl (private val dao: PostDao) : PostRepository {
             throw UnknownError
         }
     }
+
+
 
     override fun shareById(id: Long) {
         TODO("Not yet implemented")

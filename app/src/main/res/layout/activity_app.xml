@@ -9,3 +9,8 @@
     app:defaultNavHost="true"
     app:navGraph="@navigation/nav_main"
     tools:context=".activity.AppActivity" />
+
+
+
+
+

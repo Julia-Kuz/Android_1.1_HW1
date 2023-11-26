@@ -12,6 +12,7 @@ data class PostEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
     val author: String,
+    val authorId: Long,
     val content: String,
     val published: Long,
     val likes: Int,
@@ -29,12 +30,12 @@ data class PostEntity(
 // prefix аргумент в аннотации @Embedded используется для предотвращения конфликтов имен столбцов в базе данных, добавляя префикс к каждому имени столбца встроенного класса.
 
 ) {
-    fun toDto() = Post(id, author, content, published, likes, likedByMe, share, views, videoLink, saved, authorAvatar, hidden, attachment?.toDto())
+    fun toDto() = Post(id, author, authorId, content, published, likes, likedByMe, share, views, videoLink, saved, authorAvatar, hidden, attachment?.toDto())
 
 
     companion object {
         fun fromDto(dto: Post) : PostEntity {
-            return PostEntity(dto.id, dto.author, dto.content, dto.published, dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink,
+            return PostEntity(dto.id, dto.author, dto.authorId, dto.content, dto.published, dto.likes, dto.likedByMe, dto.share, dto.views, dto.videoLink,
                 dto.saved, dto.authorAvatar, dto.hidden, AttachmentEmbeddable.fromDto(dto.attachment))
         }
     }

@@ -5,27 +5,43 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat.invalidateOptionsMenu
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentMainBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.Constants
 import ru.netology.nmedia.util.PostDealtWith
+import ru.netology.nmedia.viewModel.AuthViewModel
 import ru.netology.nmedia.viewModel.PostViewModel
+import ru.netology.nmedia.viewModel.SignInViewModel
 
 class MainFragment : Fragment() {
 
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment   //предоставляем viemodel нескольким фрагментам
     )
+    private val viewModelAuth: AuthViewModel by viewModels()
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,7 +56,11 @@ class MainFragment : Fragment() {
 
         val adapter = PostsAdapter(object : OnInteractionListener {
             override fun like(post: Post) {
-                viewModel.likeById(post.id)
+                if (viewModelAuth.authenticated) {
+                    viewModel.likeById(post.id)
+                } else {
+                    findNavController().navigate(R.id.action_mainFragment_to_dialogFragment)
+                }
             }
 
             override fun share(post: Post) {
@@ -101,6 +121,60 @@ class MainFragment : Fragment() {
 
         binding.newPosts.visibility = View.GONE
 
+        //реализация меню для авторизации с ToolBar
+
+        val toolbar: Toolbar = binding.toolbarMain
+
+        // с использованием Live data
+//        viewModelAuth.dataAuth.observe(viewLifecycleOwner) {
+//            toolbar.invalidateMenu()
+//        }
+
+        // с использованием Flow
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED){ //наблюдаем за авторизацией, только когда активити/фрагмент доступен для взаимодействия
+                viewModelAuth.dataAuth.collect{
+                    toolbar.invalidateMenu()
+                }
+            }
+        }
+
+        toolbar.addMenuProvider (object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.menu_main, menu)
+
+                menu.let {
+                    it.setGroupVisible(R.id.unauthenticated, !viewModelAuth.authenticated)
+                    it.setGroupVisible(R.id.authenticated, viewModelAuth.authenticated)
+                }
+            }
+
+//            override fun onPrepareMenu(menu: Menu) {
+//                menu.setGroupVisible(R.id.unauthenticated, !viewModelAuth.authenticated)
+//                menu.setGroupVisible(R.id.authenticated, viewModelAuth.authenticated)
+//            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
+                when (menuItem.itemId) {
+                    R.id.signin -> {
+                        findNavController().navigate(R.id.action_mainFragment_to_signInFragment)
+                        true
+                    }
+
+                    R.id.signup -> {
+                        findNavController().navigate(R.id.action_mainFragment_to_signUpFragment)
+                        true
+                    }
+
+                    R.id.signout -> {
+                        findNavController().navigate(R.id.action_mainFragment_to_dialogFragmentSignOut)
+                        true
+                    }
+
+                    else -> false
+                }
+        })
+
         binding.recyclerList.adapter = adapter  // получаю доступ к RecyclerView
 
         viewModel.data.observe(viewLifecycleOwner) { feedModel ->
@@ -115,9 +189,10 @@ class MainFragment : Fragment() {
 
             val visiblePosts = feedModel.posts.filter { !it.hidden }
             val difference = visiblePosts.size > adapter.currentList.size
+            val recyclerNotEmpty = adapter.currentList.size != 0 //чтобы при возвращении с фрагмента с фото, лента оставалась на посте с этим фото
 
             adapter.submitList(visiblePosts) {
-                if (difference) {
+                if (difference && recyclerNotEmpty) {
                     binding.recyclerList.smoothScrollToPosition(0)
                     binding.newPosts.visibility = View.GONE
                 }
@@ -158,17 +233,22 @@ class MainFragment : Fragment() {
         }
 
         binding.addPost.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_mainFragment_to_newPostFragment,
-                // Bundle().apply { textArg = viewModel.draft }             // черновик с помощью VieModel
-                Bundle().apply {
-                    val text = (activity as AppActivity).getSharedPreferences(
-                        Constants.DRAFT_PREF_NAME,
-                        Context.MODE_PRIVATE
-                    ).getString(Constants.DRAFT_KEY, "")
-                    textArg = text
-                }
-            )
+            if (viewModelAuth.authenticated) {
+                findNavController().navigate(
+                    R.id.action_mainFragment_to_newPostFragment,
+                    // Bundle().apply { textArg = viewModel.draft }             // черновик с помощью VieModel
+                    Bundle().apply {
+                        val text = (activity as AppActivity).getSharedPreferences(
+                            Constants.DRAFT_PREF_NAME,
+                            Context.MODE_PRIVATE
+                        ).getString(Constants.DRAFT_KEY, "")
+                        textArg = text
+                    }
+                )
+            } else {
+                findNavController().navigate(R.id.action_mainFragment_to_dialogFragment)
+            }
+
         }
 
         return binding.root
