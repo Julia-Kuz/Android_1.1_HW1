@@ -20,6 +20,7 @@ import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.PushToken
 
 private const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/" // в build.gradle в buildTypes прописали в зависимости от сборки
 
@@ -49,6 +50,9 @@ interface PostsApiService {
     @Multipart
     @POST("media")
     suspend fun saveMedia(@Part media: MultipartBody.Part): Response<Media>
+
+    @POST("users/push-tokens")
+    suspend fun sendPushToken (@Body pushToken: PushToken): Response<Unit>
 
 //    @FormUrlEncoded
 //    @POST("users/authentication")

@@ -1,63 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".activity.SignInFragment"
-    android:layout_gravity="center">
+    android:layout_gravity="center"
+    tools:context=".activity.SignInFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:paddingHorizontal="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:paddingHorizontal="48dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
 
         <EditText
             android:id="@+id/userLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/grey"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/password"
-            android:hint="@string/Login"
             android:layout_marginVertical="@dimen/common_spacing"
-            android:padding="@dimen/common_spacing" />
+            android:background="@color/grey"
+            android:hint="@string/Login"
+            android:padding="@dimen/common_spacing"
+            app:layout_constraintBottom_toTopOf="@id/password"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/grey"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/userLogin"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:hint="@string/password"
             android:layout_marginVertical="@dimen/common_spacing"
-            android:padding="@dimen/common_spacing"/>
+            android:background="@color/grey"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:padding="@dimen/common_spacing"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/userLogin" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/signInEnter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/common_spacing"
             android:background="@color/grey_blue"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/userLogin"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:gravity="center"
+            android:padding="@dimen/common_spacing"
             android:text="@string/sign_in"
             android:textSize="20sp"
-            android:gravity="center"
-            android:layout_marginVertical="@dimen/common_spacing"
-            android:padding="@dimen/common_spacing"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/userLogin" />
 
     </LinearLayout>
 
