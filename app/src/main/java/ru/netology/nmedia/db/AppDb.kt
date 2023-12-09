@@ -11,22 +11,24 @@ import ru.netology.nmedia.entity.PostEntity
 //если несколько таблиц в БД, то передаем через запятую: @Database(entities = [PostEntity::class, Table2::class, и т.д.], version = 1)
 
 abstract class AppDb : RoomDatabase() {
-    abstract fun postDao(): PostDao          //используем в Viewmodel: private val repository: PostRepository = PostRepositoryRoomImpl(AppDb.getInstance(context = application).postDao())
+    abstract fun postDao(): PostDao
 
-    companion object {
-        @Volatile
-        private var instance: AppDb? = null
+    // companion object при внедрении зависимостей (Manual) убираем, строки 28-31 - переносим в DependencyContainer
+//    companion object {
+//        @Volatile
+//        private var instance: AppDb? = null
+//
+//        fun getInstance(context: Context): AppDb {
+//            return instance ?: synchronized(this) {
+//                instance ?: buildDatabase(context).also { instance = it }
+//            }
+//        }
+//
+//        private fun buildDatabase(context: Context) =
+//            Room.databaseBuilder(context, AppDb::class.java, "app.db")
+//                .fallbackToDestructiveMigration()
+//                //.allowMainThreadQueries() //с корутинами не нужно
+//                .build()
+//    }
 
-        fun getInstance(context: Context): AppDb {
-            return instance ?: synchronized(this) {
-                instance ?: buildDatabase(context).also { instance = it }
-            }
-        }
-
-        private fun buildDatabase(context: Context) =
-            Room.databaseBuilder(context, AppDb::class.java, "app.db")
-                .fallbackToDestructiveMigration()
-                //.allowMainThreadQueries() //с корутинами не нужно
-                .build()
-    }
 }

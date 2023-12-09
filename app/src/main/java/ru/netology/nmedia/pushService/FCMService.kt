@@ -1,4 +1,4 @@
-package ru.netology.nmedia.service
+package ru.netology.nmedia.pushService
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -8,23 +8,31 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.AppActivity
 import ru.netology.nmedia.auth.AppAuth
+import javax.inject.Inject
+//import ru.netology.nmedia.dependencyInjection.DependencyContainer
 import kotlin.random.Random
 
+@AndroidEntryPoint
 class FCMService : FirebaseMessagingService() {
     private val action = "action"
     private val content = "content"
     private val channelId = "server"
     private val gson = Gson()
+
+    //private val dependencyContainer = DependencyContainer.getInstance()
+
+    @Inject
+    lateinit var appAuth: AppAuth
 
     override fun onCreate() {
         super.onCreate()
@@ -74,10 +82,10 @@ class FCMService : FirebaseMessagingService() {
         val pushMessage = gson.fromJson(message.data[content], PushMessage::class.java)
 
         when (pushMessage.recipientId) {
-            AppAuth.getInstance().authStateFlow.value.id -> handlePushMessage("все ок, id совпадают :)", pushMessage)
+            appAuth.authStateFlow.value.id -> handlePushMessage("все ок, id совпадают :)", pushMessage)
             null -> handlePushMessage("Массовая рассылка", pushMessage)
-            0L -> AppAuth.getInstance().sendPushToken()
-            else -> AppAuth.getInstance().sendPushToken()
+            0L -> appAuth.sendPushToken()
+            else -> appAuth.sendPushToken()
         }
 
     }
@@ -85,7 +93,7 @@ class FCMService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         //println(token)
-        AppAuth.getInstance().sendPushToken(token)
+        appAuth.sendPushToken(token)
     }
 
     private fun handlePushMessage(title: String, pushMessage: PushMessage) {

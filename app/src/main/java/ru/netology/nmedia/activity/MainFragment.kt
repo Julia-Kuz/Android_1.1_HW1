@@ -18,11 +18,13 @@ import androidx.core.app.ActivityCompat.invalidateOptionsMenu
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
@@ -31,20 +33,43 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentMainBinding
+//import ru.netology.nmedia.dependencyInjection.DependencyContainer
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.Constants
 import ru.netology.nmedia.util.PostDealtWith
 import ru.netology.nmedia.viewModel.AuthViewModel
 import ru.netology.nmedia.viewModel.PostViewModel
 import ru.netology.nmedia.viewModel.SignInViewModel
+//import ru.netology.nmedia.viewModel.ViewModelFactory
 
+@AndroidEntryPoint
 class MainFragment : Fragment() {
 
-    private val viewModel: PostViewModel by viewModels(
-        ownerProducer = ::requireParentFragment   //предоставляем viemodel нескольким фрагментам
-    )
-    private val viewModelAuth: AuthViewModel by viewModels()
+    //private val dependencyContainer = DependencyContainer.getInstance()
 
+//    private val viewModel: PostViewModel by viewModels(
+//        ownerProducer = ::requireParentFragment,   //предоставляем viemodel нескольким фрагментам
+//        factoryProducer = {
+//            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
+//        }
+//    )
+//    private val viewModelAuth: AuthViewModel by viewModels(
+//        ownerProducer = ::requireParentFragment,
+//        factoryProducer = {
+//            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
+//        }
+//    )
+
+//    private val viewModel: PostViewModel by viewModels(
+//        ownerProducer = ::requireParentFragment   //предоставляем viemodel нескольким фрагментам
+//    )
+//    private val viewModelAuth: AuthViewModel by viewModels(
+//        ownerProducer = ::requireParentFragment
+//    )
+
+//  вместо стр 62-67 пишем (см ниже). Так происходит потому что Hilt с определённой версии перестал поддерживать ownerProducer
+    private val viewModel: PostViewModel by activityViewModels()
+    private val viewModelAuth: AuthViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

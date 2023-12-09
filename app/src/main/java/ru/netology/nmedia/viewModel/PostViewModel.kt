@@ -1,29 +1,27 @@
 package ru.netology.nmedia.viewModel
 
-import android.app.Application
 import android.net.Uri
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.PostRepository
-import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
+import javax.inject.Inject
 
 
 private val defaultPost = Post(
@@ -37,24 +35,15 @@ private val defaultPost = Post(
     authorId = 0
 )
 
-class PostViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository: PostRepository =
-        PostRepositoryImpl(AppDb.getInstance(context = application).postDao()) // !!! Лучше, чтобы это было внутри конструктора PostViewModel(application: Application, ...)
-
-    //до авторизации
-//    val data: LiveData<FeedModel> = repository.data
-//        .map(::FeedModel)  //возвращает данные в виде flow , поэтому вызываем ф-цию расширения asLiveData
-//        .catch { // обрабатывает исключения
-//            it.printStackTrace()
-//        }
-//        .asLiveData(Dispatchers.Default) //сюда передаем контекст, на котором будет работать это преобразование: Dispatchers.Default (чтобы не с главного потока),
-//                                         // поэтому в репозитории flowOn(Dispatchers.Default) можно опустить
-
+@HiltViewModel
+class PostViewModel @Inject constructor (
+    private val repository: PostRepository,
+    appAuth: AppAuth
+) : ViewModel() {
 
     //для авторизации: меняем принцип формирования data - нужно flow из БД объединить с flow авторизации:
 
-    val data: LiveData<FeedModel> = AppAuth.getInstance()
+    val data: LiveData<FeedModel> = appAuth
         .authStateFlow
         .flatMapLatest { auth -> //эта лямбда вызывается каждый раз, как меняется значение авторизации authStateFlow
             repository.data.map { posts ->

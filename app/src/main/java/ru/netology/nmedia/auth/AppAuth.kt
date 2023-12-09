@@ -11,6 +11,11 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.ktx.FirebaseMessagingKtxRegistrar
 import com.google.firebase.messaging.ktx.messaging
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -20,8 +25,11 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import ru.netology.nmedia.api.AuthApi
-import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.api.AuthApiService
+import ru.netology.nmedia.api.PostsApiService
+//import ru.netology.nmedia.dependencyInjection.DependencyContainer
+//import ru.netology.nmedia.api.AuthApi
+//import ru.netology.nmedia.api.PostsApi
 import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
@@ -29,6 +37,8 @@ import ru.netology.nmedia.error.UnknownError
 import ru.netology.nmedia.workers.SendPushTokenWorker
 import java.io.File
 import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 
 //делаем приватный конструктор - классическая реализация синглтона
 //
@@ -38,7 +48,11 @@ import java.io.IOException
 
 //выполняет роль репозитория => создаю отдельную вьюмодель
 
-class AppAuth private constructor(private val context: Context) {
+@Singleton
+class AppAuth @Inject constructor  (
+    @ApplicationContext
+    private val context: Context
+    ) {
     private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
     private val idKey = "id"
     private val tokenKey = "token"
@@ -93,9 +107,16 @@ class AppAuth private constructor(private val context: Context) {
         sendPushToken()
     }
 
+    @InstallIn(SingletonComponent::class)
+    @EntryPoint
+    interface AppAuthEntryPoint {
+        fun getAuthApiService(): AuthApiService
+    }
+
     suspend fun checkAuth(login: String, password: String): AuthState =
         try {
-            val response =  AuthApi.retrofitService.checkUser(login, password)
+            val entryPoint = EntryPointAccessors.fromApplication(context, AppAuthEntryPoint::class.java)
+            val response =  entryPoint.getAuthApiService().checkUser(login, password)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -111,7 +132,9 @@ class AppAuth private constructor(private val context: Context) {
 
     suspend fun registerUser (login: String, password: String, name: String): AuthState =
         try {
-            val response =  AuthApi.retrofitService.registerUser(login, password, name)
+            //val response =  DependencyContainer.getInstance().authApiService.registerUser(login, password, name)
+            val entryPoint = EntryPointAccessors.fromApplication(context, AppAuthEntryPoint::class.java)
+            val response =  entryPoint.getAuthApiService().registerUser(login, password, name)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -131,7 +154,9 @@ class AppAuth private constructor(private val context: Context) {
             val loginRequest = login.toRequestBody("text/plain".toMediaType())
             val passwordRequest = password.toRequestBody("text/plain".toMediaType())
             val nameRequest = name.toRequestBody("text/plain".toMediaType())
-            val response =  AuthApi.retrofitService.registerWithPhoto (loginRequest, passwordRequest, nameRequest, part)
+            //val response =  DependencyContainer.getInstance().authApiService.registerWithPhoto (loginRequest, passwordRequest, nameRequest, part)
+            val entryPoint = EntryPointAccessors.fromApplication(context, AppAuthEntryPoint::class.java)
+            val response =  entryPoint.getAuthApiService().registerWithPhoto (loginRequest, passwordRequest, nameRequest, part)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -169,7 +194,7 @@ class AppAuth private constructor(private val context: Context) {
 //            try {
 //                //val pushToken = PushToken(token ?: Firebase.messaging.token.await())
 //                val pushToken = PushToken(token ?: FirebaseMessaging.getInstance().token.await()) //лекция: либо токен уже готовый из вне, либо обращаемся к Firebase
-//                PostsApi.retrofitService.sendPushToken(pushToken)
+//                PostsApi.retrofitService.sendPushToken(pushToken) // !  PostsApi.retrofitService при внедрении зависимостей изменить надо на DependencyContainer.getInstance().authApiService
 //            } catch (e: Exception) {
 //                e.printStackTrace()
 //            }
@@ -177,23 +202,23 @@ class AppAuth private constructor(private val context: Context) {
     }
 
     //описываем инициализацию этого синглтона
-    companion object {
-        @Volatile
-        private var instance: AppAuth? = null
-
-        fun getInstance(): AppAuth = synchronized(this) {
-            instance ?: throw IllegalStateException(
-                "getInstance should be called only after initAuth!" +
-                        " AppAuth is not initialized, you must call AppAuth.initializeApp(Context context) first."
-            )
-        }
-
-        fun initAuth(context: Context): AppAuth = instance ?: synchronized(this) {
-            instance ?: buildAuth(context).also { instance = it }  //опять проверяем instance на случай, если два потока одновременно пытаются инициализировать
-        }
-
-        private fun buildAuth(context: Context): AppAuth = AppAuth(context) //создаем экземпляр
-    }
+//    companion object {
+//        @Volatile
+//        private var instance: AppAuth? = null
+//
+//        fun getInstance(): AppAuth = synchronized(this) {
+//            instance ?: throw IllegalStateException(
+//                "getInstance should be called only after initAuth!" +
+//                        " AppAuth is not initialized, you must call AppAuth.initializeApp(Context context) first."
+//            )
+//        }
+//
+//        fun initAuth(context: Context): AppAuth = instance ?: synchronized(this) {
+//            instance ?: buildAuth(context).also { instance = it }  //опять проверяем instance на случай, если два потока одновременно пытаются инициализировать
+//        }
+//
+//        private fun buildAuth(context: Context): AppAuth = AppAuth(context) //создаем экземпляр
+//    }
 }
 
 data class AuthState(val id: Long = 0, val token: String? = null) //для хранения id & token
