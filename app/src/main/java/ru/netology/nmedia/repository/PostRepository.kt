@@ -1,17 +1,20 @@
 package ru.netology.nmedia.repository
 
 import androidx.lifecycle.LiveData
+import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.PhotoModel
 
 interface PostRepository {
 
-    val data: Flow<List<Post>> //Добавим свойство, которое будет отвечать за предоставление данных в виде Flow (с корректным импортом!)
+    //val data: Flow<List<Post>> //Добавим свойство, которое будет отвечать за предоставление данных в виде Flow (с корректным импортом!)
+
+    val data: Flow<PagingData<Post>>  //пагинация
 
     fun getNewerCount(id: Long): Flow<Int>
 
-    suspend fun getAll()
+    //suspend fun getAll()
     suspend fun updatePosts()
     suspend fun save(post: Post)
     suspend fun likeById(id: Long, flag: Boolean)

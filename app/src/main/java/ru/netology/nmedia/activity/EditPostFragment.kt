@@ -26,15 +26,6 @@ import ru.netology.nmedia.viewModel.PostViewModel
 @AndroidEntryPoint
 class EditPostFragment : Fragment() {
 
-//    private val dependencyContainer = DependencyContainer.getInstance()
-//
-//    private val viewModel: PostViewModel by viewModels(
-//        ownerProducer = ::requireParentFragment,
-//        factoryProducer = {
-//            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-//        }
-//    )
-
     private val viewModel: PostViewModel by activityViewModels()
 
     override fun onCreateView(

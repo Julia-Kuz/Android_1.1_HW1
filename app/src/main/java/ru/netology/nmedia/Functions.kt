@@ -3,7 +3,10 @@ package ru.netology.nmedia
 import android.widget.ImageView
 import androidx.core.view.marginEnd
 import androidx.core.view.marginTop
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.bumptech.glide.Glide
+import ru.netology.nmedia.dto.Post
 
 fun numberRepresentation(number: Int): String {
 
@@ -41,6 +44,14 @@ fun ImageView.load (url: String) {
         .error(R.drawable.ic_error_24)
         .timeout(10_000)
         .into(this)
+}
+
+fun transformPagingDataToList(pagingData: PagingData<Post>): List<Post> {
+    val list = mutableListOf<Post>()
+    pagingData.map { data ->
+        list.add(data)
+    }
+    return list.toList()
 }
 
 

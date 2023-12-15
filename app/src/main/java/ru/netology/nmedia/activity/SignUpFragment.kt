@@ -26,15 +26,6 @@ import ru.netology.nmedia.viewModel.SignUpViewModel
 @AndroidEntryPoint
 class SignUpFragment : Fragment() {
 
-//    private val dependencyContainer = DependencyContainer.getInstance()
-//
-//    private val viewModelSignUp: SignUpViewModel by viewModels(
-//        ownerProducer = ::requireParentFragment,   //предоставляем viemodel нескольким фрагментам
-//        factoryProducer = {
-//            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-//        }
-//    )
-
     private val viewModelSignUp: SignUpViewModel by activityViewModels()
 
     private val photoResultContract = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {

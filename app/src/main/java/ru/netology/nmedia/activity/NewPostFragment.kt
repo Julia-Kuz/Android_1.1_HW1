@@ -33,15 +33,6 @@ class NewPostFragment : Fragment() {
         var Bundle.textArg: String? by StringArg
     }
 
-//    private val dependencyContainer = DependencyContainer.getInstance()
-//
-//    private val viewModel: PostViewModel by viewModels(
-//        ownerProducer = ::requireParentFragment,
-//        factoryProducer = {
-//            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-//        }
-//    )
-
     private val viewModel: PostViewModel by activityViewModels()
 
     private val photoResultContract = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {

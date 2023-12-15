@@ -24,8 +24,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
@@ -45,29 +47,8 @@ import ru.netology.nmedia.viewModel.SignInViewModel
 @AndroidEntryPoint
 class MainFragment : Fragment() {
 
-    //private val dependencyContainer = DependencyContainer.getInstance()
+//  теперь пишем (см ниже). Так происходит потому что Hilt с определённой версии перестал поддерживать ownerProducer
 
-//    private val viewModel: PostViewModel by viewModels(
-//        ownerProducer = ::requireParentFragment,   //предоставляем viemodel нескольким фрагментам
-//        factoryProducer = {
-//            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-//        }
-//    )
-//    private val viewModelAuth: AuthViewModel by viewModels(
-//        ownerProducer = ::requireParentFragment,
-//        factoryProducer = {
-//            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-//        }
-//    )
-
-//    private val viewModel: PostViewModel by viewModels(
-//        ownerProducer = ::requireParentFragment   //предоставляем viemodel нескольким фрагментам
-//    )
-//    private val viewModelAuth: AuthViewModel by viewModels(
-//        ownerProducer = ::requireParentFragment
-//    )
-
-//  вместо стр 62-67 пишем (см ниже). Так происходит потому что Hilt с определённой версии перестал поддерживать ownerProducer
     private val viewModel: PostViewModel by activityViewModels()
     private val viewModelAuth: AuthViewModel by activityViewModels()
 
@@ -206,45 +187,74 @@ class MainFragment : Fragment() {
 
         binding.recyclerList.adapter = adapter  // получаю доступ к RecyclerView
 
-        viewModel.data.observe(viewLifecycleOwner) { feedModel ->
-
-//            val newPost =
-//                feedModel.posts.size > adapter.currentList.size //проверяем, что это добавление поста, а не др действие (лайк и т.п.)
-//            adapter.submitList(feedModel.posts) {
-//                if (newPost) {
+//        viewModel.data.observe(viewLifecycleOwner) { feedModel ->
+//
+////            val newPost =
+////                feedModel.posts.size > adapter.currentList.size //проверяем, что это добавление поста, а не др действие (лайк и т.п.)
+////            adapter.submitList(feedModel.posts) {
+////                if (newPost) {
+////                    binding.recyclerList.smoothScrollToPosition(0)
+////                } // scroll к верхнему сообщению только при добавлении
+////            }
+//
+//            val visiblePosts = feedModel.posts.filter { !it.hidden }
+//            val difference = visiblePosts.size > adapter.currentList.size
+//            val recyclerNotEmpty = adapter.currentList.size != 0 //чтобы при возвращении с фрагмента с фото, лента оставалась на посте с этим фото
+//
+//            adapter.submitList(visiblePosts) {
+//                if (difference && recyclerNotEmpty) {
 //                    binding.recyclerList.smoothScrollToPosition(0)
-//                } // scroll к верхнему сообщению только при добавлении
+//                    binding.newPosts.visibility = View.GONE
+//                }
 //            }
+//            binding.emptyText.isVisible = feedModel.empty
+//        }
 
-            val visiblePosts = feedModel.posts.filter { !it.hidden }
-            val difference = visiblePosts.size > adapter.currentList.size
-            val recyclerNotEmpty = adapter.currentList.size != 0 //чтобы при возвращении с фрагмента с фото, лента оставалась на посте с этим фото
 
-            adapter.submitList(visiblePosts) {
-                if (difference && recyclerNotEmpty) {
-                    binding.recyclerList.smoothScrollToPosition(0)
-                    binding.newPosts.visibility = View.GONE
+        //пагинация
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.data.collectLatest{
+                    adapter.submitData(it)
                 }
             }
-            binding.emptyText.isVisible = feedModel.empty
         }
 
-        var count = 0
-        viewModel.newerCount.observe(viewLifecycleOwner) {
-            if (it != 0) {
-                count++
-                if (count > 1) {binding.newPosts.text = "$count New Posts"}
-                else {binding.newPosts.text = "$count New Post"}
-                binding.newPosts.visibility = View.VISIBLE
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                adapter.loadStateFlow.collectLatest { state ->
+                    binding.swiperefresh.isRefreshing =
+                        state.refresh is LoadState.Loading ||
+                                state.prepend is LoadState.Loading ||
+                                state.append is LoadState.Loading
+                }
             }
         }
 
-        binding.newPosts.setOnClickListener {
-            viewModel.updatePosts()
-            binding.newPosts.visibility = View.GONE
-            binding.recyclerList.smoothScrollToPosition(0)
-            count = 0
-        }
+        binding.swiperefresh.setOnRefreshListener{adapter.refresh()}
+
+//        binding.swiperefresh.setOnRefreshListener {
+//            viewModel.refreshPosts()
+//            //viewModel.loadPosts()
+//            binding.swiperefresh.isRefreshing = false
+//        }
+
+//        var count = 0
+//        viewModel.newerCount.observe(viewLifecycleOwner) {
+//            if (it != 0) {
+//                count++
+//                if (count > 1) {binding.newPosts.text = "$count New Posts"}
+//                else {binding.newPosts.text = "$count New Post"}
+//                binding.newPosts.visibility = View.VISIBLE
+//            }
+//        }
+
+//        binding.newPosts.setOnClickListener {
+//            viewModel.updatePosts()
+//            binding.newPosts.visibility = View.GONE
+//            binding.recyclerList.smoothScrollToPosition(0)
+//            count = 0
+//        }
 
         viewModel.dataState.observe(viewLifecycleOwner) { feedModelState ->
             binding.progress.isVisible = feedModelState.loading
@@ -252,13 +262,12 @@ class MainFragment : Fragment() {
         }
 
         binding.retryButton.setOnClickListener {
-            viewModel.loadPosts()
-        }
-
-        binding.swiperefresh.setOnRefreshListener {
-            viewModel.refreshPosts()
             //viewModel.loadPosts()
-            binding.swiperefresh.isRefreshing = false
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.data.collectLatest {
+                    adapter.submitData(it)
+                }
+            }
         }
 
         binding.addPost.setOnClickListener {
