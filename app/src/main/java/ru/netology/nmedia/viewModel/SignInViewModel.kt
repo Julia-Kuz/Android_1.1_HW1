@@ -3,12 +3,15 @@ package ru.netology.nmedia.viewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.util.SingleLiveEvent
+import javax.inject.Inject
 
-class SignInViewModel : ViewModel() {
-    private val dataAuth = AppAuth.getInstance()
+@HiltViewModel
+class SignInViewModel @Inject constructor (private val appAuth: AppAuth): ViewModel() {
+    private val dataAuth = appAuth
 
     private val _response = SingleLiveEvent<Unit>()
     val response: LiveData<Unit> = _response

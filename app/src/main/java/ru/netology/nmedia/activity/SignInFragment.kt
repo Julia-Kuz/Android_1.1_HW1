@@ -7,18 +7,32 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentSignInBinding
+//import ru.netology.nmedia.dependencyInjection.DependencyContainer
 import ru.netology.nmedia.viewModel.AuthViewModel
 import ru.netology.nmedia.viewModel.SignInViewModel
+//import ru.netology.nmedia.viewModel.ViewModelFactory
 
+@AndroidEntryPoint
 class SignInFragment : Fragment() {
 
-    private val viewModelSignIn: SignInViewModel by viewModels()
+//    private val dependencyContainer = DependencyContainer.getInstance()
+//
+//    private val viewModelSignIn: SignInViewModel by viewModels(
+//        ownerProducer = ::requireParentFragment,   //предоставляем viemodel нескольким фрагментам
+//        factoryProducer = {
+//            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
+//        }
+//    )
+
+    private val viewModelSignIn: SignInViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

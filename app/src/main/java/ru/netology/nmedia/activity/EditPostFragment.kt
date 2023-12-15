@@ -11,20 +11,31 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentEditPostBinding
+//import ru.netology.nmedia.dependencyInjection.DependencyContainer
 import ru.netology.nmedia.load
 import ru.netology.nmedia.util.PostDealtWith
 import ru.netology.nmedia.viewModel.PostViewModel
+//import ru.netology.nmedia.viewModel.ViewModelFactory
 
-
+@AndroidEntryPoint
 class EditPostFragment : Fragment() {
 
-    private val viewModel: PostViewModel by viewModels(
-        ownerProducer = ::requireParentFragment
-    )
+//    private val dependencyContainer = DependencyContainer.getInstance()
+//
+//    private val viewModel: PostViewModel by viewModels(
+//        ownerProducer = ::requireParentFragment,
+//        factoryProducer = {
+//            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
+//        }
+//    )
+
+    private val viewModel: PostViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
