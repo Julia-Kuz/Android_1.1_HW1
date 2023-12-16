@@ -58,19 +58,30 @@ class PostRemoteMediator(
                 when (loadType) {
                     LoadType.REFRESH -> {
                         //postDao.removeAll()
-                        postRemoteKeyDao.removeAll()
-                        postRemoteKeyDao.insert(
-                            listOf(
-                                PostRemoteKeyEntity(
-                                    type = PostRemoteKeyEntity.KeyType.AFTER,
-                                    id = bodyResponse.first().id,
-                                ),
-                                PostRemoteKeyEntity(
-                                    type = PostRemoteKeyEntity.KeyType.BEFORE,
-                                    id = bodyResponse.last().id,
-                                ),
-                            )
-                        )
+                        //postRemoteKeyDao.removeAll()
+                        if (bodyResponse.isNotEmpty()) {
+                            if (postDao.isEmpty()) {
+                                postRemoteKeyDao.insert(
+                                    listOf(
+                                        PostRemoteKeyEntity(
+                                            type = PostRemoteKeyEntity.KeyType.AFTER,
+                                            id = bodyResponse.first().id,
+                                        ),
+                                        PostRemoteKeyEntity(
+                                            type = PostRemoteKeyEntity.KeyType.BEFORE,
+                                            id = bodyResponse.last().id,
+                                        )
+                                    )
+                                )
+                            } else {
+                                postRemoteKeyDao.insert(
+                                    PostRemoteKeyEntity(
+                                        type = PostRemoteKeyEntity.KeyType.AFTER,
+                                        id = bodyResponse.first().id,
+                                    )
+                                )
+                            }
+                        }
                     }
 
 
@@ -93,8 +104,7 @@ class PostRemoteMediator(
                     }
                 }
 
-                postDao.insert(bodyResponse.toEntity())
-                //postDao.insert(body.map {PostEntity.fromDto(it) })
+                postDao.insert(bodyResponse.map { it.copy(saved = true) }.toEntity())
             }
 
             return MediatorResult.Success(endOfPaginationReached = bodyResponse.isEmpty())

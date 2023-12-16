@@ -178,40 +178,22 @@ class PostViewModel @Inject constructor (
     }
 
 
-    private fun dataHelp (): List <Post> {
-        var list = mutableListOf<Post>()
-        viewModelScope.launch {
-            try {
-                data.map { pagingDataPost ->  transformPagingDataToList(pagingDataPost) }
-                    .collect{ it.map { post -> list.add(post) }}
-            } catch (e: Exception) {
-                _postCreatedError.value = Unit
-            }
-        }
-        return list
-    }
-
-    fun likeById(id: Long) {
+    fun likeById(post: Post) {
 //        val saved = data.value?.posts?.find { it.id == id }?.saved
 //        val flag = data.value?.posts?.find { it.id == id }?.likedByMe
 
-        val list = dataHelp()
-        val saved = list.find { it.id == id }?.saved
-        val flag = list.find { it.id == id }?.likedByMe
-
-        if (saved == true) {
-            if (flag != null) {
-                viewModelScope.launch {
-                    try {
-                        repository.likeById(id, flag)
-                        _dataState.value = FeedModelState()
-                    } catch (e: Exception) {
-                        _dataState.value = FeedModelState(error = true)
-                    }
+        if (post.saved) {
+            viewModelScope.launch {
+                try {
+                    repository.likeById(post.id, post.likedByMe)
+                    _dataState.value = FeedModelState()
+                } catch (e: Exception) {
+                    _dataState.value = FeedModelState(error = true)
                 }
             }
         }
     }
+
 
     fun removeById(id: Long) {
         viewModelScope.launch {

@@ -61,8 +61,8 @@ interface PostDao {
     @Query("UPDATE PostEntity SET videoLink = :link WHERE id = :id")
     fun addLink(id: Long, link: String)
 
-//    @Query("SELECT COUNT(*) == 0 FROM PostEntity")
-//    suspend fun isEmpty(): Boolean
+    @Query("SELECT COUNT(*) == 0 FROM PostEntity")
+    suspend fun isEmpty(): Boolean
 
 //    @Query("UPDATE PostEntity SET content = :content WHERE id = :id")
 //    suspend fun updateContentById(id: Long, content: String)

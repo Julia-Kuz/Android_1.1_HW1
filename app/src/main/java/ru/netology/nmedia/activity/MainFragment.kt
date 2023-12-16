@@ -66,7 +66,7 @@ class MainFragment : Fragment() {
         val adapter = PostsAdapter(object : OnInteractionListener {
             override fun like(post: Post) {
                 if (viewModelAuth.authenticated) {
-                    viewModel.likeById(post.id)
+                    viewModel.likeById(post)
                 } else {
                     findNavController().navigate(R.id.action_mainFragment_to_dialogFragment)
                 }

@@ -107,7 +107,7 @@ class CardPostFragment : Fragment() {
 
 
                 likesIcon.setOnClickListener {
-                    viewModel.likeById(post.id)
+                    viewModel.likeById(post)
                 }
 
                 shareIcon.setOnClickListener {
