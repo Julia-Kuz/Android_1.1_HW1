@@ -49,10 +49,17 @@ class PostRepositoryImpl @Inject constructor(
 
 
 //    //пагинация только сервер
+//    override val data: Flow<PagingData<Post>> = Pager(
+//        config = PagingConfig(pageSize = 5, enablePlaceholders = false),
+//        pagingSourceFactory = { PostPagingSource(postApiService) },
+//    ).flow
+
+    //пагинация только БД
+
     override val data: Flow<PagingData<Post>> = Pager(
         config = PagingConfig(pageSize = 5, enablePlaceholders = false),
-        pagingSourceFactory = { PostPagingSource(postApiService) },
-    ).flow
+        pagingSourceFactory = { dao.getPagingSource()},
+    ).flow.map { pagingData -> pagingData.map(PostEntity::toDto) }
 
     //пагинация БД и сервер
 //    @OptIn(ExperimentalPagingApi::class)
@@ -121,68 +128,68 @@ class PostRepositoryImpl @Inject constructor(
 
         dao.insert(PostEntity.fromDto(post))
 
-        try {
-            val response = postApiService.save(post)
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-
-            val result = response.body() ?: throw ApiError(response.code(), response.message())
-
-            dao.updatePost(PostEntity.fromDto(result))
-
-            //dao.insert(PostEntity.fromDto(result))
-
-        } catch (e: IOException) {
-            throw NetworkError
-        } catch (e: Exception) {
-            throw UnknownError
-        }
+//        try {
+//            val response = postApiService.save(post)
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//
+//            val result = response.body() ?: throw ApiError(response.code(), response.message())
+//
+//            dao.updatePost(PostEntity.fromDto(result))
+//
+//            //dao.insert(PostEntity.fromDto(result))
+//
+//        } catch (e: IOException) {
+//            throw NetworkError
+//        } catch (e: Exception) {
+//            throw UnknownError
+//        }
     }
 
     override suspend fun saveWithAttachment(post: Post, photoModel: PhotoModel) {
         dao.insert(PostEntity.fromDto(post))
 
-        try {
-            val mediaResponse = saveMedia(photoModel.file)   //отправили изображение на сервер
-
-            if (!mediaResponse.isSuccessful) {
-                throw ApiError(mediaResponse.code(), mediaResponse.message())
-            }
-
-            val media = mediaResponse.body() ?: throw ApiError(
-                mediaResponse.code(),
-                mediaResponse.message()
-            ) //получили результат
-
-            val response = postApiService.save(
-                post.copy(
-                    attachment = Attachment(
-                        media.id,
-                        "",
-                        AttachmentType.IMAGE
-                    )
-                )
-            ) //добавили копию поста, записали в него attachment
-
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-
-            val result = response.body() ?: throw ApiError(
-                response.code(),
-                response.message()
-            )   //получили ответ
-
-            dao.updatePost(PostEntity.fromDto(result))  //записываем в базу
-
-            //dao.insert(PostEntity.fromDto(result))
-
-        } catch (e: IOException) {
-            throw NetworkError
-        } catch (e: Exception) {
-            throw UnknownError
-        }
+//        try {
+//            val mediaResponse = saveMedia(photoModel.file)   //отправили изображение на сервер
+//
+//            if (!mediaResponse.isSuccessful) {
+//                throw ApiError(mediaResponse.code(), mediaResponse.message())
+//            }
+//
+//            val media = mediaResponse.body() ?: throw ApiError(
+//                mediaResponse.code(),
+//                mediaResponse.message()
+//            ) //получили результат
+//
+//            val response = postApiService.save(
+//                post.copy(
+//                    attachment = Attachment(
+//                        media.id,
+//                        "",
+//                        AttachmentType.IMAGE
+//                    )
+//                )
+//            ) //добавили копию поста, записали в него attachment
+//
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//
+//            val result = response.body() ?: throw ApiError(
+//                response.code(),
+//                response.message()
+//            )   //получили ответ
+//
+//            dao.updatePost(PostEntity.fromDto(result))  //записываем в базу
+//
+//            //dao.insert(PostEntity.fromDto(result))
+//
+//        } catch (e: IOException) {
+//            throw NetworkError
+//        } catch (e: Exception) {
+//            throw UnknownError
+//        }
     }
 
     //функция по сохранению media на сервер
@@ -198,40 +205,40 @@ class PostRepositoryImpl @Inject constructor(
     override suspend fun likeById(id: Long, flag: Boolean) {
         dao.likeById(id)
 
-        try {
-            val response = if (!flag) {
-                postApiService.likeById(id)
-            } else {
-                postApiService.dislikeById(id)
-            }
-
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
-//                dao.likeById(body.id)
-        } catch (e: IOException) {
-            throw NetworkError
-        } catch (e: Exception) {
-            throw UnknownError
-        }
+//        try {
+//            val response = if (!flag) {
+//                postApiService.likeById(id)
+//            } else {
+//                postApiService.dislikeById(id)
+//            }
+//
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//            val body = response.body() ?: throw ApiError(response.code(), response.message())
+////                dao.likeById(body.id)
+//        } catch (e: IOException) {
+//            throw NetworkError
+//        } catch (e: Exception) {
+//            throw UnknownError
+//        }
     }
 
     override suspend fun removeById(id: Long) {
         dao.removeById(id)
-        try {
-            val response = postApiService.removeById(id)
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-
-            response.body() ?: throw ApiError(response.code(), response.message())
-//            dao.removeById(id)
-        } catch (e: IOException) {
-            throw NetworkError
-        } catch (e: Exception) {
-            throw UnknownError
-        }
+//        try {
+//            val response = postApiService.removeById(id)
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//
+//            response.body() ?: throw ApiError(response.code(), response.message())
+////            dao.removeById(id)
+//        } catch (e: IOException) {
+//            throw NetworkError
+//        } catch (e: Exception) {
+//            throw UnknownError
+//        }
     }
 
 
