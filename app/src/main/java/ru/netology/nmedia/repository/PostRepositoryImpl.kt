@@ -49,20 +49,20 @@ class PostRepositoryImpl @Inject constructor(
 
 
 //    //пагинация только сервер
-//    override val data: Flow<PagingData<Post>> = Pager(
-//        config = PagingConfig(pageSize = 5, enablePlaceholders = false),
-//        pagingSourceFactory = { PostPagingSource(postApiService) },
-//    ).flow
-
-    //пагинация БД и сервер
-    @OptIn(ExperimentalPagingApi::class)
     override val data: Flow<PagingData<Post>> = Pager(
         config = PagingConfig(pageSize = 5, enablePlaceholders = false),
-        pagingSourceFactory = {dao.getPagingSource()},
-        remoteMediator = PostRemoteMediator(postApiService, dao, postRemoteKeyDao = postRemoteKeyDao, appDb = appDb)
-    ).flow.map { pagingData ->
-        pagingData.map(PostEntity::toDto)
-    }
+        pagingSourceFactory = { PostPagingSource(postApiService) },
+    ).flow
+
+    //пагинация БД и сервер
+//    @OptIn(ExperimentalPagingApi::class)
+//    override val data: Flow<PagingData<Post>> = Pager(
+//        config = PagingConfig(pageSize = 5, enablePlaceholders = false),
+//        pagingSourceFactory = {dao.getPagingSource()},
+//        remoteMediator = PostRemoteMediator(postApiService, dao, postRemoteKeyDao = postRemoteKeyDao, appDb = appDb)
+//    ).flow.map { pagingData ->
+//        pagingData.map(PostEntity::toDto)
+//    }
 
 
 //    override suspend fun getAll() {
