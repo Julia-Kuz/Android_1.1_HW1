@@ -182,7 +182,7 @@ class PostViewModel @Inject constructor (
 //        val saved = data.value?.posts?.find { it.id == id }?.saved
 //        val flag = data.value?.posts?.find { it.id == id }?.likedByMe
 
-        if (post.saved) {
+//        if (post.saved) {
             viewModelScope.launch {
                 try {
                     repository.likeById(post.id, post.likedByMe)
@@ -191,7 +191,7 @@ class PostViewModel @Inject constructor (
                     _dataState.value = FeedModelState(error = true)
                 }
             }
-        }
+ //       }
     }
 
 
