@@ -194,31 +194,13 @@ class AppAuth @Inject constructor  (
 //            try {
 //                //val pushToken = PushToken(token ?: Firebase.messaging.token.await())
 //                val pushToken = PushToken(token ?: FirebaseMessaging.getInstance().token.await()) //лекция: либо токен уже готовый из вне, либо обращаемся к Firebase
-//                PostsApi.retrofitService.sendPushToken(pushToken) // !  PostsApi.retrofitService при внедрении зависимостей изменить надо на DependencyContainer.getInstance().authApiService
+//                PostsApi.retrofitService.sendPushToken(pushToken) // !  PostsApi.retrofitService при внедрении зависимостей изменить надо
 //            } catch (e: Exception) {
 //                e.printStackTrace()
 //            }
 //        }
     }
 
-    //описываем инициализацию этого синглтона
-//    companion object {
-//        @Volatile
-//        private var instance: AppAuth? = null
-//
-//        fun getInstance(): AppAuth = synchronized(this) {
-//            instance ?: throw IllegalStateException(
-//                "getInstance should be called only after initAuth!" +
-//                        " AppAuth is not initialized, you must call AppAuth.initializeApp(Context context) first."
-//            )
-//        }
-//
-//        fun initAuth(context: Context): AppAuth = instance ?: synchronized(this) {
-//            instance ?: buildAuth(context).also { instance = it }  //опять проверяем instance на случай, если два потока одновременно пытаются инициализировать
-//        }
-//
-//        private fun buildAuth(context: Context): AppAuth = AppAuth(context) //создаем экземпляр
-//    }
 }
 
 data class AuthState(val id: Long = 0, val token: String? = null) //для хранения id & token

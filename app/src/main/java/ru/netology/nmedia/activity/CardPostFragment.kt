@@ -14,8 +14,15 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.paging.filter
+import androidx.paging.map
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
 //import ru.netology.nmedia.dependencyInjection.DependencyContainer
@@ -24,6 +31,7 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.load
 import ru.netology.nmedia.loadCircle
 import ru.netology.nmedia.numberRepresentation
+import ru.netology.nmedia.transformPagingDataToList
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.util.Constants
 import ru.netology.nmedia.util.PostDealtWith
@@ -34,15 +42,6 @@ import java.util.Locale
 
 @AndroidEntryPoint
 class CardPostFragment : Fragment() {
-
-//    private val dependencyContainer = DependencyContainer.getInstance()
-//
-//    private val viewModel: PostViewModel by viewModels(
-//        ownerProducer = ::requireParentFragment,
-//        factoryProducer = {
-//            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-//        }
-//    )
 
     private val viewModel: PostViewModel by activityViewModels()
 
@@ -108,7 +107,7 @@ class CardPostFragment : Fragment() {
 
 
                 likesIcon.setOnClickListener {
-                    viewModel.likeById(post.id)
+                    viewModel.likeById(post)
                 }
 
                 shareIcon.setOnClickListener {
@@ -182,8 +181,16 @@ class CardPostFragment : Fragment() {
 
         fill(post)
 
-        viewModel.data.observe(viewLifecycleOwner) {feedModel ->
-            feedModel.posts.find { it.id == post.id }?.let { fill(it.copy()) }
+//        viewModel.data.observe(viewLifecycleOwner) {feedModel ->
+//            feedModel.posts.find { it.id == post.id }?.let { fill(it.copy()) }
+//        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.data.collectLatest { pagingDataPost ->
+                    transformPagingDataToList(pagingDataPost).find { it.id == post.id }?.let { fill(it.copy()) }
+                }
+            }
         }
 
         return binding.root

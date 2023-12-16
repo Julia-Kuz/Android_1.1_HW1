@@ -23,15 +23,6 @@ import ru.netology.nmedia.viewModel.SignInViewModel
 @AndroidEntryPoint
 class SignInFragment : Fragment() {
 
-//    private val dependencyContainer = DependencyContainer.getInstance()
-//
-//    private val viewModelSignIn: SignInViewModel by viewModels(
-//        ownerProducer = ::requireParentFragment,   //предоставляем viemodel нескольким фрагментам
-//        factoryProducer = {
-//            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-//        }
-//    )
-
     private val viewModelSignIn: SignInViewModel by activityViewModels()
 
     override fun onCreateView(

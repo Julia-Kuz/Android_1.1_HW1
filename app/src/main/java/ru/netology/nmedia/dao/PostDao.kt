@@ -1,6 +1,7 @@
 package ru.netology.nmedia.dao
 
 import androidx.compose.animation.core.updateTransition
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -8,11 +9,19 @@ import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import ru.netology.nmedia.entity.PostEntity
+import ru.netology.nmedia.repository.PostPagingSource
 
 @Dao
 interface PostDao {
-    @Query("SELECT * FROM PostEntity ORDER BY id DESC")
-    fun getAll(): Flow<List<PostEntity>>  // Правильный импорт д.б. - kotlinx.coroutines.flow.Flow !!!
+
+//    @Query("SELECT * FROM PostEntity ORDER BY id DESC")
+//    fun getAll(): Flow<List<PostEntity>>  // Правильный импорт д.б. - kotlinx.coroutines.flow.Flow !!!
+
+    @Query("SELECT * FROM PostEntity ORDER BY id DESC") //пагинация
+    fun getPagingSource(): PagingSource<Int, PostEntity>
+
+    @Query("DELETE FROM PostEntity")
+    suspend fun removeAll()
 
     @Insert (onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)
@@ -52,9 +61,8 @@ interface PostDao {
     @Query("UPDATE PostEntity SET videoLink = :link WHERE id = :id")
     fun addLink(id: Long, link: String)
 
-
-//    @Query("SELECT COUNT(*) == 0 FROM PostEntity")
-//    suspend fun isEmpty(): Boolean
+    @Query("SELECT COUNT(*) == 0 FROM PostEntity")
+    suspend fun isEmpty(): Boolean
 
 //    @Query("UPDATE PostEntity SET content = :content WHERE id = :id")
 //    suspend fun updateContentById(id: Long, content: String)
