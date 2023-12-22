@@ -25,13 +25,23 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
+import androidx.paging.LoadStates
+import androidx.paging.PagingSource
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
+import ru.netology.nmedia.adapter.PagingLoadStateAdapter
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentMainBinding
@@ -185,7 +195,22 @@ class MainFragment : Fragment() {
                 }
         })
 
-        binding.recyclerList.adapter = adapter  // получаю доступ к RecyclerView
+        // получаю доступ к RecyclerView
+        //binding.recyclerList.setHasFixedSize(true)
+        binding.recyclerList.adapter = adapter.withLoadStateHeaderAndFooter(
+                header = PagingLoadStateAdapter(object : PagingLoadStateAdapter.OnInteractionListener {
+                override fun onRetry() {
+                    adapter.retry()
+                }
+            }),
+                footer = PagingLoadStateAdapter(object : PagingLoadStateAdapter.OnInteractionListener {
+                override fun onRetry() {
+                    adapter.retry()
+                }
+            }),
+        )
+
+
 
 //        viewModel.data.observe(viewLifecycleOwner) { feedModel ->
 //
@@ -223,15 +248,41 @@ class MainFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 adapter.loadStateFlow.collectLatest { state ->
-                    binding.swiperefresh.isRefreshing =
-                        state.refresh is LoadState.Loading ||
-                                state.prepend is LoadState.Loading ||
-                                state.append is LoadState.Loading
+                    binding.swiperefresh.isRefreshing = state.refresh is LoadState.Loading
+//                        state.refresh is LoadState.Loading ||
+//                                state.prepend is LoadState.Loading ||
+//                                state.append is LoadState.Loading
                 }
             }
         }
 
-        binding.swiperefresh.setOnRefreshListener{adapter.refresh()}
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                adapter.loadStateFlow.collectLatest {
+
+                    adapter.loadStateFlow
+                        .distinctUntilChangedBy { r -> r.source.refresh } // Only emit when REFRESH LoadState for the paging source changes.
+                        .map { it.source.refresh is LoadState.NotLoading } // Only react to cases where REFRESH completes i.e., NotLoading.
+                        .collectLatest { binding.recyclerList.scrollToPosition(0) }
+
+
+                    adapter.loadStateFlow
+                        .distinctUntilChangedBy { p -> p.source.prepend }
+                        .map { it.source.prepend is LoadState.NotLoading }
+                        .collectLatest { binding.recyclerList.scrollToPosition(0) }
+
+                    adapter.loadStateFlow
+                        .distinctUntilChangedBy { a -> a.source.append }
+                        .map { it.source.append is LoadState.NotLoading }
+                        .collectLatest { binding.recyclerList.scrollToPosition( adapter.itemCount-1) }
+                }
+            }
+        }
+
+        binding.swiperefresh.setOnRefreshListener{
+            adapter.refresh()
+        }
 
 //        binding.swiperefresh.setOnRefreshListener {
 //            viewModel.refreshPosts()

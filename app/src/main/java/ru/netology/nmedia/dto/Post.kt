@@ -2,8 +2,23 @@ package ru.netology.nmedia.dto
 
 import ru.netology.nmedia.util.AttachmentType
 
+sealed interface FeedItem{
+    val id: Long
+}
+
+data class Ad(
+    override val id: Long,
+    //val url: String,
+    val image: String,
+) : FeedItem
+
+data class TimingSeparator (
+    override val id: Long = 0L,
+    val name: String
+): FeedItem
+
 data class Post(
-    val id: Long,
+    override val id: Long,
     val author: String,
     val authorId: Long,
     val content: String,
@@ -18,7 +33,7 @@ data class Post(
     val hidden: Boolean,
     val attachment: Attachment? = null,
     val ownedByMe: Boolean = false
-)
+) : FeedItem
 
 data class Attachment(
     val url: String = "",
