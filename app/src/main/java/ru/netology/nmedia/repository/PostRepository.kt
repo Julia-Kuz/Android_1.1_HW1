@@ -13,7 +13,7 @@ interface PostRepository {
 
     val data: Flow<PagingData<FeedItem>>  //пагинация
 
-    fun getNewerCount(id: Long): Flow<Int>
+    fun getNewerCount(): Flow<Long>
 
     //suspend fun getAll()
     suspend fun updatePosts()

@@ -33,13 +33,15 @@ class PostRemoteMediator(
                 LoadType.REFRESH -> service.getLatest(state.config.pageSize)
 
                 LoadType.PREPEND -> {
-                    //return MediatorResult.Success(endOfPaginationReached = true) // Автоматический PREPEND был отключен, т. е. при scroll к первому сверху элементу данные автоматически не подгружались.
-                    val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(endOfPaginationReached = false)
-                    service.getAfter(id, state.config.pageSize)
+                    return MediatorResult.Success(endOfPaginationReached = true) // Автоматический PREPEND был отключен, т. е. при scroll к первому сверху элементу данные автоматически не подгружались.
+//                    val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(endOfPaginationReached = false)
+//                    service.getAfter(id, state.config.pageSize)
                 }
 
                 LoadType.APPEND -> {
-                    val id = postRemoteKeyDao.min() ?: return MediatorResult.Success(endOfPaginationReached = false)
+                    val id = postRemoteKeyDao.min() ?: return MediatorResult.Success(
+                        endOfPaginationReached = false
+                    )
                     service.getBefore(id, state.config.pageSize)
                 }
 
@@ -55,8 +57,9 @@ class PostRemoteMediator(
             )
 
             if (bodyResponse.isEmpty()) return MediatorResult.Success(endOfPaginationReached = true)
-
-            appDb.withTransaction {
+            if ( bodyResponse.isNotEmpty())
+            {
+                appDb.withTransaction {
                 when (loadType) {
                     LoadType.REFRESH -> {
 
@@ -73,40 +76,20 @@ class PostRemoteMediator(
                                 )
                             )
                         )
-
-//                        if (postDao.isEmpty()) {
-//                            postRemoteKeyDao.insert(
-//                                listOf(
-//                                    PostRemoteKeyEntity(
-//                                        type = PostRemoteKeyEntity.KeyType.AFTER,
-//                                        id = bodyResponse.first().id,
-//                                    ),
-//                                    PostRemoteKeyEntity(
-//                                        type = PostRemoteKeyEntity.KeyType.BEFORE,
-//                                        id = bodyResponse.last().id,
-//                                    )
-//                                )
-//                            )
-//                        } else {
-//                            postRemoteKeyDao.insert(
-//                                PostRemoteKeyEntity(
-//                                    type = PostRemoteKeyEntity.KeyType.AFTER,
-//                                    id = bodyResponse.first().id,
-//                                )
-//                            )
-//                        }
                         postDao.removeAll()
                     }
 
 
-                    LoadType.PREPEND -> {
-                        postRemoteKeyDao.insert(
-                            PostRemoteKeyEntity(
-                                type = PostRemoteKeyEntity.KeyType.AFTER,
-                                id = bodyResponse.first().id,
-                            )
-                        )
-                    }
+                    LoadType.PREPEND -> Unit
+
+//                    {
+//                        postRemoteKeyDao.insert(
+//                            PostRemoteKeyEntity(
+//                                type = PostRemoteKeyEntity.KeyType.AFTER,
+//                                id = bodyResponse.first().id,
+//                            )
+//                        )
+//                    }
 
                     LoadType.APPEND -> {
                         postRemoteKeyDao.insert(
@@ -120,6 +103,8 @@ class PostRemoteMediator(
                 }
 
                 postDao.insert(bodyResponse.map { it.copy(saved = true) }.toEntity())
+
+                }
             }
 
             return MediatorResult.Success(endOfPaginationReached = bodyResponse.isEmpty())

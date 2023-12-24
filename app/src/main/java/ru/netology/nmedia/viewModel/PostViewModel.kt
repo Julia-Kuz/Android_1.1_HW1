@@ -84,6 +84,8 @@ class PostViewModel @Inject constructor (
             }
         }.flowOn(Dispatchers.Default)
 
+    val newerCount = repository.getNewerCount()
+
 
 //    val newerCount: LiveData<Int> = data.switchMap { //т.е. это пересоздание LiveData (data) при каждом изменении исходной/списка постов/
 //        //repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L) //передаем id самого последнего поста, который является id самого первого поста в списке постов

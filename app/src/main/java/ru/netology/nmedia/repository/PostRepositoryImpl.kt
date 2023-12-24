@@ -10,6 +10,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -30,18 +32,13 @@ import ru.netology.nmedia.dto.Ad
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Media
-import ru.netology.nmedia.dto.TimingSeparator
 import ru.netology.nmedia.entity.PostEntity
-import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.util.AttachmentType
 import java.io.File
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneOffset
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -72,7 +69,7 @@ class PostRepositoryImpl @Inject constructor(
     //пагинация БД и сервер
     @OptIn(ExperimentalPagingApi::class)
     override val data: Flow<PagingData<FeedItem>> = Pager(
-        config = PagingConfig(pageSize = 5, enablePlaceholders = true),
+        config = PagingConfig(pageSize = 8, enablePlaceholders = true),
         pagingSourceFactory = {dao.getPagingSource()},
         remoteMediator = PostRemoteMediator(postApiService, dao, postRemoteKeyDao = postRemoteKeyDao, appDb = appDb)
     ).flow.map { pagingData ->
@@ -80,16 +77,10 @@ class PostRepositoryImpl @Inject constructor(
             .insertSeparators { previousItem, nextItem ->
                 if (previousItem?.id?.rem(5) == 0L) {
                     Ad(Random.nextLong(), "figma.jpg")
+                } else {
+                   chooseSeparator(previousItem, nextItem)
                 }
-
-                else if (previousItem!=null) {
-                    //TimingSeparator (name = "Today")
-                    val nameSeparator = chooseSeparator(previousItem.published, nextItem?.published)
-                    if (nameSeparator != null) {
-                        TimingSeparator(Random.nextLong(), name = nameSeparator)
-                    } else null
-                }
-                else null
+                //else null
             }
     }
 
@@ -118,24 +109,22 @@ class PostRepositoryImpl @Inject constructor(
 //        }
 //    }
 
-    override fun getNewerCount(id: Long): Flow<Int> = flow {//импорт из пакета корутин
-        while (true) { // м.сделать бесконечный цикл, т.к.по switchMap (вьюмодель) неактуальные flow будут отменяться
-            delay(10_000L)
-            val response = postApiService.getNewer(id)
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
-            val newBody = body.map {
-                it.copy(saved = true, hidden = true)
-            }
-            dao.insert(newBody.toEntity())
-            emit(body.size)
+    override fun getNewerCount(): Flow<Long> = dao.max()
+        .flatMapLatest {
+            if (it != null) {
+                flow {           //импорт из пакета корутин
+                    while (true) {                 // м.сделать бесконечный цикл, т.к. flatMapLatest неактуальные flow отменяет
+                        delay(10_000L)
+                        val response = postApiService.getNewer(it)
+                        val body = response.body()
+                        emit(body?.count ?: 0 )
+                    }
+                }
+            } else emptyFlow()
         }
-    }
         .catch { e -> e.printStackTrace() } // e -> throw AppError.from(e) - роняет приложение
         .flowOn(Dispatchers.Default)
+
 
     override suspend fun updatePosts() {
         val newPosts = dao.getNewPosts()

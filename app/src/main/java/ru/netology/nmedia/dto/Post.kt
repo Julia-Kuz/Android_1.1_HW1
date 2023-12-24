@@ -1,9 +1,11 @@
 package ru.netology.nmedia.dto
 
 import ru.netology.nmedia.util.AttachmentType
+import java.time.OffsetDateTime
+import java.time.OffsetTime
 
 sealed interface FeedItem{
-    val id: Long
+    val id: Any
 }
 
 data class Ad(
@@ -13,16 +15,22 @@ data class Ad(
 ) : FeedItem
 
 data class TimingSeparator (
-    override val id: Long = 0L,
+    override val id : Separator,
     val name: String
 ): FeedItem
+
+enum class Separator {
+    TODAY,
+    YESTERDAY,
+    TWO_WEEKS_AGO
+}
 
 data class Post(
     override val id: Long,
     val author: String,
     val authorId: Long,
     val content: String,
-    val published: Long,
+    val published: Long, //OffsetDateTime
     val likes: Int = 0,
     val likedByMe: Boolean = false,
     val share: Int = 0,

@@ -27,6 +27,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
 import androidx.paging.PagingSource
+import androidx.paging.flatMap
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,6 +46,7 @@ import ru.netology.nmedia.adapter.PagingLoadStateAdapter
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentMainBinding
+import ru.netology.nmedia.dto.FeedItem
 //import ru.netology.nmedia.dependencyInjection.DependencyContainer
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.Constants
@@ -211,31 +213,6 @@ class MainFragment : Fragment() {
         )
 
 
-
-//        viewModel.data.observe(viewLifecycleOwner) { feedModel ->
-//
-////            val newPost =
-////                feedModel.posts.size > adapter.currentList.size //проверяем, что это добавление поста, а не др действие (лайк и т.п.)
-////            adapter.submitList(feedModel.posts) {
-////                if (newPost) {
-////                    binding.recyclerList.smoothScrollToPosition(0)
-////                } // scroll к верхнему сообщению только при добавлении
-////            }
-//
-//            val visiblePosts = feedModel.posts.filter { !it.hidden }
-//            val difference = visiblePosts.size > adapter.currentList.size
-//            val recyclerNotEmpty = adapter.currentList.size != 0 //чтобы при возвращении с фрагмента с фото, лента оставалась на посте с этим фото
-//
-//            adapter.submitList(visiblePosts) {
-//                if (difference && recyclerNotEmpty) {
-//                    binding.recyclerList.smoothScrollToPosition(0)
-//                    binding.newPosts.visibility = View.GONE
-//                }
-//            }
-//            binding.emptyText.isVisible = feedModel.empty
-//        }
-
-
         //пагинация
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -259,23 +236,18 @@ class MainFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
+
                 adapter.loadStateFlow.collectLatest {
 
-                    adapter.loadStateFlow
-                        .distinctUntilChangedBy { r -> r.source.refresh } // Only emit when REFRESH LoadState for the paging source changes.
-                        .map { it.source.refresh is LoadState.NotLoading } // Only react to cases where REFRESH completes i.e., NotLoading.
-                        .collectLatest { binding.recyclerList.scrollToPosition(0) }
+//                    adapter.loadStateFlow
+//                        .distinctUntilChangedBy { r -> r.source.refresh } // Only emit when REFRESH LoadState for the paging source changes.
+//                        .map { it.source.refresh is LoadState.NotLoading } // Only react to cases where REFRESH completes i.e., NotLoading.
+//                        .collectLatest {binding.recyclerList.scrollToPosition(0) }
 
 
-                    adapter.loadStateFlow
-                        .distinctUntilChangedBy { p -> p.source.prepend }
-                        .map { it.source.prepend is LoadState.NotLoading }
-                        .collectLatest { binding.recyclerList.scrollToPosition(0) }
-
-                    adapter.loadStateFlow
-                        .distinctUntilChangedBy { a -> a.source.append }
-                        .map { it.source.append is LoadState.NotLoading }
-                        .collectLatest { binding.recyclerList.scrollToPosition( adapter.itemCount-1) }
+                    if (it.refresh.endOfPaginationReached) {
+                        binding.recyclerList.scrollToPosition (0)
+                    }
                 }
             }
         }
@@ -284,28 +256,20 @@ class MainFragment : Fragment() {
             adapter.refresh()
         }
 
-//        binding.swiperefresh.setOnRefreshListener {
-//            viewModel.refreshPosts()
-//            //viewModel.loadPosts()
-//            binding.swiperefresh.isRefreshing = false
-//        }
 
-//        var count = 0
-//        viewModel.newerCount.observe(viewLifecycleOwner) {
-//            if (it != 0) {
-//                count++
-//                if (count > 1) {binding.newPosts.text = "$count New Posts"}
-//                else {binding.newPosts.text = "$count New Post"}
-//                binding.newPosts.visibility = View.VISIBLE
-//            }
-//        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.newerCount.collect {
+                    if (it > 0) {binding.newPosts.text = "New Posts"}
+                    binding.newPosts.isVisible = it > 0
+                }
+            }
+        }
 
-//        binding.newPosts.setOnClickListener {
-//            viewModel.updatePosts()
-//            binding.newPosts.visibility = View.GONE
-//            binding.recyclerList.smoothScrollToPosition(0)
-//            count = 0
-//        }
+        binding.newPosts.setOnClickListener {
+            adapter.refresh()
+            binding.newPosts.visibility = View.GONE
+        }
 
         viewModel.dataState.observe(viewLifecycleOwner) { feedModelState ->
             binding.progress.isVisible = feedModelState.loading

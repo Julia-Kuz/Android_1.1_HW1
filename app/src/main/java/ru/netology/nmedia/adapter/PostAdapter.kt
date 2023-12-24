@@ -12,12 +12,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
+import ru.netology.nmedia.chooseSeparator
 import ru.netology.nmedia.databinding.CardAdBinding
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
 import ru.netology.nmedia.databinding.TimingSeparatorBinding
 import ru.netology.nmedia.dto.Ad
 import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.Separator
 import ru.netology.nmedia.dto.TimingSeparator
 import ru.netology.nmedia.load
 import ru.netology.nmedia.loadCircle
@@ -75,6 +77,7 @@ class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+
         when (val item = getItem(position)) {
             is Post -> (holder as? PostViewHolder)?.bind(item)
             is Ad -> (holder as? AdViewHolder)?.bind(item)
@@ -107,7 +110,9 @@ class PostViewHolder(
     private val binding: FragmentCardPostBinding,
     private val onInteractionListener: OnInteractionListener
 ) : RecyclerView.ViewHolder(binding.root) {
+
     fun bind(post: Post) {
+
         binding.apply {
             author.text = post.author
             published.text = SimpleDateFormat("dd MMM yyyy в HH:mm", Locale.getDefault())

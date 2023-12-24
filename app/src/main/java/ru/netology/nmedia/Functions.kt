@@ -1,17 +1,20 @@
 package ru.netology.nmedia
 
 import android.widget.ImageView
-import androidx.core.view.marginEnd
-import androidx.core.view.marginTop
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.bumptech.glide.Glide
 import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.Separator
 import ru.netology.nmedia.dto.TimingSeparator
+import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
-import kotlin.random.Random
+
 
 fun numberRepresentation(number: Int): String {
 
@@ -61,31 +64,39 @@ fun transformPagingDataToList(pagingData: PagingData<FeedItem>): List<Post> {
     return list.toList()
 }
 
-fun chooseSeparator (previous: Long, next: Long?): String? {
+//***** Timing Separator
 
-    val currentTime = LocalDateTime.now()
-    val currentTimeLong = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) * 1000
-    val twentyFourHoursAgo = currentTime.minusHours(24).toEpochSecond(ZoneOffset.UTC) * 1000
-    val fortyEightHoursAgo = currentTime.minusHours(48).toEpochSecond(ZoneOffset.UTC) * 1000
+class Time (post: Post?) {
 
-    val namePrevious = when (previous) {
-        in currentTimeLong until twentyFourHoursAgo -> "Today"
-        in twentyFourHoursAgo until fortyEightHoursAgo -> "Yesterday"
-        else  -> "Last week"
-    }
-
-    val nameNext = when (next) {
-        null -> "null"
-        in currentTimeLong until twentyFourHoursAgo -> "Today"
-        in twentyFourHoursAgo until fortyEightHoursAgo -> "Yesterday"
-        else  -> "Last week"
-    }
-
-    return if (next == null) {
-        namePrevious
-    } else if (nameNext != namePrevious) {
-         namePrevious
+    private val today: OffsetDateTime = OffsetDateTime.now()
+    private val yesterday: OffsetDateTime = today.minusDays(1)
+    private val lastWeek: OffsetDateTime = today.minusDays(2)
+    private val postTime: OffsetDateTime? = if (post != null) {
+        Instant.ofEpochMilli(post.published*1000).atOffset(ZoneOffset.UTC)
     } else null
+
+    fun isLastWeek(): Boolean =
+        lastWeek.year == postTime?.year && lastWeek.dayOfYear == postTime.dayOfYear
+
+    fun isYesterday(): Boolean =
+        yesterday.year == postTime?.year && yesterday.dayOfYear == postTime.dayOfYear
+
+    fun isToday(): Boolean =
+        today.year == postTime?.year && today.dayOfYear == postTime.dayOfYear
+
 }
 
 
+fun chooseSeparator (previous: Post?, next: Post?) : TimingSeparator? {
+    val previousPost = Time (previous)
+    val nextPost = Time (next)
+
+    return if (!previousPost.isToday() && nextPost.isToday() && next != null) {
+        TimingSeparator(Separator.TODAY, "Today")
+    } else if (!previousPost.isYesterday() && nextPost.isYesterday()) {
+        TimingSeparator (Separator.YESTERDAY, "Yesterday")
+    } else if (!previousPost.isLastWeek() && nextPost.isLastWeek()) {
+        TimingSeparator(Separator.TWO_WEEKS_AGO, "Two weeks ago")
+    }
+    else null
+}
